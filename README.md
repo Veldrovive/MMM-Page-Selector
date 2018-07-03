@@ -1,4 +1,5 @@
 # MMM-Page-Selector
+![Demo](https://i.imgur.com/pcrZAHf.gif)<br/>
 Page Selector is meant to make it easy to configure the positions and visibility of any module on your [MagicMirror²](https://github.com/MichMich/MagicMirror) on the fly and to make those pages able to be changed from any other module. By default, MMM-Page-Selector works with MMM-page-indicator and MMM-Voice-Commands, but could easily be configured to interact with other modules if the need arose. 
 
 ## Installation
