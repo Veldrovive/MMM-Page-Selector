@@ -15,10 +15,6 @@ Module.register("MMM-Page-Selector", {
 		this.displayTitle = this.config.displayTitle,
 		this.neverHide = this.config.neverHide;
 		this.neverHide.push(this.name);
-
-		this.setUpPage = this.setUpPage.bind(this);
-
-		setTimeout(this.setUpPage, 0, this.page, this);
 	},
 
 	getStyles: function () {
@@ -81,7 +77,7 @@ Module.register("MMM-Page-Selector", {
 				container = node;
 			}
 		})
-		container.appendChild(ref);
+		container.prepend(ref);
 	},
 
 	setUpPage: function(pageName) {
@@ -105,6 +101,7 @@ Module.register("MMM-Page-Selector", {
 				}else if(self.neverHide.indexOf(module.name) === -1){
 					//If the module is in the page object and is not included the neverHide object, move it to the correct location
 					self.moveRefToLoc(self.getModuleRef(module), page[findIndex(page, {module: module.name})].position);
+					console.log("Moving: ",module.name);
 					module.show(500);
 				}
 			});
@@ -118,15 +115,23 @@ Module.register("MMM-Page-Selector", {
 		if(notification === "PAGE_SELECT"){
 			const payloadToNum = WtoN.convert(payload);
 			if(isNaN(payloadToNum)){
-				this.sendSocketNotification("RELAY_PAGE_SELECT", payload);
+				self.sendSocketNotification("RELAY_PAGE_SELECT", payload);
 			}else{
 				const key = Object.keys(self.pages)[payloadToNum-1];
 				if(key !== undefined){
-					this.sendSocketNotification("RELAY_PAGE_SELECT", Object.keys(self.pages)[payloadToNum-1]);
+					self.sendSocketNotification("RELAY_PAGE_SELECT", Object.keys(self.pages)[payloadToNum-1]);
 				}else{
 					Log.log("Tried to go to non-existant page: ",payloadToNum)
 				}
 			}
+		}else if(notification === "PAGE_CHANGED"){
+			const key = Object.keys(self.pages)[payload];
+			if(key !== undefined){
+				self.sendSocketNotification("RELAY_PAGE_SELECT", Object.keys(self.pages)[payload]);
+			}
+		}else if(notification === "MODULE_DOM_CREATED"){
+			self.sendNotification("MAX_PAGES_CHANGED", Object.keys(self.pages).length);
+			this.setUpPage(self.page);
 		}
 	},
 
