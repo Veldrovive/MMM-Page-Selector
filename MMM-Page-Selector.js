@@ -80,13 +80,19 @@ Module.register("MMM-Page-Selector", {
 		container.prepend(ref);
 	},
 
+	//Module.hide() deletes the module so it can no longer be moved, this keeps the reference intact so it can be moveds
+	fadeRef: function(ref, action){
+		//Action 0: fade out, 1: fade in
+
+	},
+
 	setUpPage: function(pageName) {
 		const self = this;
 		var page = self.pages[pageName];
 		if(page !== undefined){
 			//Set title once the page has been identified
 			self.page = pageName;
-			self.updateDom(1000);
+			self.updateDom(0);
 
 			//Integration with MMM-page-indicator
 			const indexOfPage = Object.keys(self.pages).indexOf(pageName);
@@ -95,14 +101,21 @@ Module.register("MMM-Page-Selector", {
 			//Code for moving and changing visibility for certain modules
 			var modules = MM.getModules();
 			modules.enumerate(function(module) {
-				if(findIndex(page, {module: module.name}) === -1 && self.neverHide.indexOf(module.name) === -1){
-					//If the module is not in the page object and it is not included in the neverHide object, hide it
-					module.hide(500);
-				}else if(self.neverHide.indexOf(module.name) === -1){
-					//If the module is in the page object and is not included the neverHide object, move it to the correct location
-					self.moveRefToLoc(self.getModuleRef(module), page[findIndex(page, {module: module.name})].position);
-					console.log("Moving: ",module.name);
-					module.show(500);
+				if(module.name !== self.name){
+					console.log("Hiding:",module.name);
+					if(self.neverHide.indexOf(module.name) === -1){
+						module.hide(500);
+					}
+					setTimeout(() => {
+						if(findIndex(page, {module: module.name}) === -1 && self.neverHide.indexOf(module.name) === -1){
+							//If the module is not in the page object and it is not included in the neverHide object, hide it
+							module.hide(500);
+						}else if(self.neverHide.indexOf(module.name) === -1){
+							//If the module is in the page object and is not included the neverHide object, move it to the correct location
+							self.moveRefToLoc(self.getModuleRef(module), page[findIndex(page, {module: module.name})].position);
+							module.show(500);
+						}
+					}, 500)
 				}
 			});
 		}
@@ -132,6 +145,11 @@ Module.register("MMM-Page-Selector", {
 		}else if(notification === "MODULE_DOM_CREATED"){
 			self.sendNotification("MAX_PAGES_CHANGED", Object.keys(self.pages).length);
 			this.setUpPage(self.page);
+
+			var modules = MM.getModules();
+		modules.enumerate(module => {
+			console.log(module);
+		})
 		}
 	},
 
