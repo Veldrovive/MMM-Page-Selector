@@ -10,11 +10,10 @@ Module.register("MMM-Page-Selector", {
 	requiresVersion: "2.1.0",
 
 	start: function() {
+		this.sendSocketNotification("UPDATE_PAGES");
+
 		this.page = this.config.page;
-		this.pages = this.config.pages;
-		this.displayTitle = this.config.displayTitle,
-		this.neverHide = this.config.neverHide;
-		this.neverHide.push(this.name);
+		this.displayTitle = this.config.displayTitle;
 	},
 
 	getStyles: function () {
@@ -43,6 +42,15 @@ Module.register("MMM-Page-Selector", {
 		}
 
 		return wrapper;
+	},
+
+	init: function(){
+		const self = this;
+
+		if(self.domLoaded && self.pagesLoaded && self.exclusionsLoaded){
+			self.sendNotification("MAX_PAGES_CHANGED", Object.keys(self.pages).length);
+			self.setUpPage(self.page);
+		}
 	},
 
 	getModuleRef: function(module){
@@ -80,12 +88,6 @@ Module.register("MMM-Page-Selector", {
 		container.prepend(ref);
 	},
 
-	//Module.hide() deletes the module so it can no longer be moved, this keeps the reference intact so it can be moveds
-	fadeRef: function(ref, action){
-		//Action 0: fade out, 1: fade in
-
-	},
-
 	setUpPage: function(pageName) {
 		const self = this;
 		var page = self.pages[pageName];
@@ -100,9 +102,8 @@ Module.register("MMM-Page-Selector", {
 
 			//Code for moving and changing visibility for certain modules
 			var modules = MM.getModules();
-			modules.enumerate(function(module) {
+			modules.enumerate(module => {
 				if(module.name !== self.name){
-					console.log("Hiding:",module.name);
 					if(self.neverHide.indexOf(module.name) === -1){
 						module.hide(500);
 					}
@@ -114,8 +115,12 @@ Module.register("MMM-Page-Selector", {
 							//If the module is in the page object and is not included the neverHide object, move it to the correct location
 							self.moveRefToLoc(self.getModuleRef(module), page[findIndex(page, {module: module.name})].position);
 							module.show(500);
+						}else{
+							module.show(0);
 						}
 					}, 500)
+				}else{
+					module.show(0);
 				}
 			});
 		}
@@ -143,20 +148,30 @@ Module.register("MMM-Page-Selector", {
 				self.sendSocketNotification("RELAY_PAGE_SELECT", Object.keys(self.pages)[payload]);
 			}
 		}else if(notification === "MODULE_DOM_CREATED"){
-			self.sendNotification("MAX_PAGES_CHANGED", Object.keys(self.pages).length);
-			this.setUpPage(self.page);
+			const modules = MM.getModules();
+			modules.enumerate(module => {
+				module.hide(0);
+			})
 
-			var modules = MM.getModules();
-		modules.enumerate(module => {
-			console.log(module);
-		})
+			self.domLoaded = true;
+			self.init();
 		}
 	},
 
 	//When the helper sends the PAGE_SELECT notification, start setting up the page cooresponding to the payload
 	socketNotificationReceived: function(notification, payload){
-		if(notification === 'PAGE_SELECT'){
-			this.setUpPage(payload);
+		const self = this;
+
+		if(notification === "SET_PAGE_CONFIG"){
+			self.pages = payload;
+			self.pagesLoaded = true;
+			self.init();
+		}else if (notification === "SET_EXCLUSIONS_CONFIG"){
+			self.neverHide = payload;
+			self.exclusionsLoaded = true;
+			self.init();
+		}else if(notification === 'PAGE_SELECT'){
+			self.setUpPage(payload);
 		}
 	},
 
