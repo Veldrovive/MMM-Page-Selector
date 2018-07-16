@@ -1,5 +1,5 @@
 # MMM-Page-Selector
-![Demo](https://i.imgur.com/pcrZAHf.gif)<br/>
+![Demo](https://i.imgur.com/7E7dn4n.gif)<br/>
 Page Selector is meant to make it easy to configure the positions and visibility of any module on your [MagicMirror²](https://github.com/MichMich/MagicMirror) on the fly and to make those pages able to be changed from any other module. By default, MMM-Page-Selector works with MMM-page-indicator and MMM-Voice-Commands, but could easily be configured to interact with other modules if the need arose. 
 
 ## Installation
@@ -13,7 +13,7 @@ Clone the repository.
 git clone https://github.com/Veldrovive/MMM-Page-Selector.git
 ```
 
-## Use
+## Usage
 ```js
 modules[
     ...
@@ -23,14 +23,24 @@ modules[
         config: {
             page: "pageName",
             displayTitle: true,
-            pages: {
-                pageName: [{module: "moduleName", position: "modulePosition"},...],
-                pageTwo: [{module: "moduleName", position: "modulePosition"},...]
-            },
-            neverHide: ["alert", "updatenotification"]
         }
     },
   ...
+    //Example of the config for a module to be shown on pages: "main" and "fun"
+    {
+        module: "MMM-any-other",
+        position: "bottom_center", //Or any other position, this doesnt matter unless "pages" is set to "all"
+        pages: {"main": "position", "fun": "another_position"},
+        config: {}
+    },
+  ...
+    //Example of the config for a module to be shown on all pages
+    {
+        module: "MMM-any-other",
+        position: "bottom_center", //This value defines the position that the module will always appear in
+        pages: "all",
+        config: {}
+    }
 ]
 ```
 
@@ -39,8 +49,6 @@ Option|Description
 ------|-----------
 `page`|Default page to display when the mirror boots up.<br/>**Expected Value Type:** `String`.
 `displayTitle`|Wether or not to display the page title.<br/>**Expected Value Type:** `boolean`.
-`pages`|Configuration of when and where to display modules.<br/>Example Page: `weather: [{{module: "MMM-3Day-Forecast", position: "bottom_center"}},{module: "calendar", position: 'top_left'},{module: "clock", position: "top_right]]`<br/>**Expected Value Type:** `Array`
-`neverHide`|Array of modules that should always appear on screen and never move.<br/>**Expected Value Type:** `Array<String>`
 
 Configurations for modules used with Page Selector are done in the normal fassion in their own object.
 
