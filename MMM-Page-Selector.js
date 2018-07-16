@@ -3,8 +3,6 @@ Module.register("MMM-Page-Selector", {
 	defaults: {
 		page: "",
 		displayTitle: true,
-		pages: {}, //Format: {"name": ["moduleName1", "moduleName2", ...]}
-		neverHide: ["alert", "updatenotification"]
 	},
 
 	requiresVersion: "2.1.0",
@@ -48,7 +46,12 @@ Module.register("MMM-Page-Selector", {
 		const self = this;
 
 		if(self.domLoaded && self.pagesLoaded && self.exclusionsLoaded){
-			self.sendNotification("MAX_PAGES_CHANGED", Object.keys(self.pages).length);
+			const pages = Object.keys(self.pages)
+			self.sendNotification("MAX_PAGES_CHANGED", pages.length);
+			if(pages.indexOf(self.page) === -1){
+				console.log("Setting page to",pages[0]);
+				self.page = pages[0];
+			}
 			self.setUpPage(self.page);
 		}
 	},
