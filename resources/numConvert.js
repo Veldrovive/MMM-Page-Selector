@@ -36,7 +36,8 @@ var WtoN = {
     'trillion': 1000000000000
   },
   convert: function (words) {
-    return this.compute(this.tokenize(words));
+    if(typeof words === "number") return words;
+    return this.compute(this.tokenize(words))-1;
   },
   tokenize: function (words) {
     var array = words.split(' ');

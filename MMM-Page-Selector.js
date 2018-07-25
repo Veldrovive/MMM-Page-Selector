@@ -3,6 +3,11 @@ Module.register("MMM-Page-Selector", {
 	defaults: {
 		page: "",
 		displayTitle: true,
+
+		selectPageNotif: [],
+		incrementPageNotif: [],
+		decrementPageNotif: []
+
 	},
 
 	requiresVersion: "2.1.0",
@@ -10,8 +15,12 @@ Module.register("MMM-Page-Selector", {
 	start: function() {
 		this.sendSocketNotification("UPDATE_PAGES");
 
-		this.page = this.config.page;
+		this.page = this.config.defaultPage || this.config.page;
 		this.displayTitle = this.config.displayTitle;
+
+		this.selectPageNotif = ["PAGE_SELECT", "PAGE_CHANGED"].concat(this.config.selectPageNotif);
+		this.incrementPageNotif = ["INCREMENT_PAGE"].concat(this.config.incrementPageNotif);
+		this.decrementPageNotif = ["DECREMENT_PAGE"].concat(this.config.decrementPageNotif);
 	},
 
 	getStyles: function () {
@@ -133,23 +142,41 @@ Module.register("MMM-Page-Selector", {
 	//if the payload is an integer, the index of the page is selected
 	notificationReceived: function(notification, payload, sender) {
 		const self = this;
-		if(notification === "PAGE_SELECT"){
-			const payloadToNum = WtoN.convert(payload);
+
+		function incrementPage(){
+			const pageArray = Object.keys(self.pages);
+			const currentPage = pageArray.indexOf(self.page);
+			const nextPage = currentPage+1 > pageArray.length-1 ? 0 : currentPage+1;
+			self.sendSocketNotification("RELAY_PAGE_SELECT", pageArray[nextPage]);
+		}
+
+		function decrementPage(){
+			const pageArray = Object.keys(self.pages);
+			const currentPage = pageArray.indexOf(self.page);
+			const nextPage = currentPage-1 < 0 ? pageArray.length-1 : currentPage-1;
+			self.sendSocketNotification("RELAY_PAGE_SELECT", pageArray[nextPage]);
+		}
+
+		function selectPage(info){
+			const payloadToNum = WtoN.convert(info);
 			if(isNaN(payloadToNum)){
-				self.sendSocketNotification("RELAY_PAGE_SELECT", payload);
+				self.sendSocketNotification("RELAY_PAGE_SELECT", payloadToNum+1);
 			}else{
-				const key = Object.keys(self.pages)[payloadToNum-1];
+				const key = Object.keys(self.pages)[payloadToNum];
 				if(key !== undefined){
-					self.sendSocketNotification("RELAY_PAGE_SELECT", Object.keys(self.pages)[payloadToNum-1]);
+					self.sendSocketNotification("RELAY_PAGE_SELECT", key);
 				}else{
-					Log.log("Tried to go to non-existant page: ",payloadToNum)
+					Log.log("Tried to navigate to a non-existant page:",payloadToNum, key);
 				}
 			}
-		}else if(notification === "PAGE_CHANGED"){
-			const key = Object.keys(self.pages)[payload];
-			if(key !== undefined){
-				self.sendSocketNotification("RELAY_PAGE_SELECT", Object.keys(self.pages)[payload]);
-			}
+		}
+
+		if(self.selectPageNotif.includes(notification)){
+			selectPage(payload);
+		}else if(self.incrementPageNotif.includes(notification)){
+			incrementPage();
+		}else if(self.decrementPageNotif.includes(notification)){
+			decrementPage();
 		}else if(notification === "MODULE_DOM_CREATED"){
 			const modules = MM.getModules();
 			modules.enumerate(module => {
