@@ -21,16 +21,16 @@ modules[
         module: "MMM-Page-Selector",
         position: "top_bar",
         config: {
-            page: "pageName",
+            defaultPage: "pageName",
             displayTitle: true,
         }
     },
   ...
-    //Example of the config for a module to be shown on pages: "main" and "fun"
+    //Example of the config for a module to be shown on pages: "pageNameOne" and "pageNameTwo"
     {
         module: "MMM-any-other",
         position: "bottom_center", //Or any other position, this doesnt matter unless "pages" is set to "all"
-        pages: {"main": "position", "fun": "another_position"},
+        pages: {"pageNameOne": "position", "pageNameTwo": "another_position"},
         config: {}
     },
   ...
@@ -43,14 +43,65 @@ modules[
     }
 ]
 ```
+Pages are created implicitly when included within a module's `pages` prop.<br/>
+For example, specifying `pages: {"main": "bottom_center", "fun": "top_right"}` will create the pages `main` and `fun` then make the module appear at the bottom center on the main page and top right on the fun page.
 
+If `pages` is set to "all", then the module will always appear in the position defined by the `position` prop.
+
+Example of a complete config for a very simple mirror:
+```js
+modules: [
+    {
+        module: "MMM-Page-Selector",
+        position: "top_center",
+        config: {
+            defaultPage: "main",
+            displayTitle: true,
+            selectPageNotif: ["SELECT_PAGE"],
+            incrementPageNotif: ["PAGE_UP"],
+            decrementPageNotif: ["PAGE_DOWN"]
+        }
+    },
+    {
+        module: "MMM-Weather-Now",
+        position: "bottom_center",
+        pages: {main: "top_right", weather: "bottom_left"}
+    },
+    {
+        module: "MMM-page-indicator",
+        position: "bottom_center",
+        pages: "all"
+    }
+]
+```
+The configuration for `MMM-Page-Selector` will:
+* `position`: Make the title of the page appear at the top_center position.
+* `page`: Display the page with the name of "main" on startup.
+* `displayTitle`: Display the page name at the defined position since it is true.
+
+* `selectPageNotif`: Sending a notification to "SELECT_PAGE" will now set the page to the payload. By default, this already includes "PAGE_SELECT" and "PAGE_CHANGED".
+
+* `incrementPageNotif`: Sending a notification to "PAGE_UP" will now increment the page. By default, this already includes "INCREMENT_PAGE".
+
+* `decrementPageNotif`: Sending a notification to "PAGE_DOWN" will now decrement the page. By default, this already includes "DECREMENT_PAGE".
+
+The configuration for `MMM-Weather-Now` will:
+* `position`: This doesn't matter, it just has to be set so Magic Mirror will render the module.
+* `pages`: Each key defines a page and each value defines the position on that page. This means that `MMM-Weather-Now` will be rendered at the top right when on the "main" page and on the bottom left when on the "weather" page.
+
+The configuration for `MMM-page-indicator` will:
+* `position`: Since this will be on all pages, setting the position to be "bottom_center" means that it will always be displayed there.
+* `pages`: Means that reguardless of the page, `MMM-page-indicator` will be shown.
 ## Configuration
 Option|Description
 ------|-----------
-`page`|Default page to display when the mirror boots up.<br/>**Expected Value Type:** `String`.
-`displayTitle`|Wether or not to display the page title.<br/>**Expected Value Type:** `boolean`.
+`defaultPage`|Default page to display when the mirror boots up.<br/>**Expected Value Type:** `String`.|
+`displayTitle`|Whether or not to display the page title.<br/>**Expected Value Type:** `boolean`.|
+`selectPageNotif`|Which notifications should be used to set the page. The payload of these notifications should be the name of the page, the index of the page written out ("one", "two",...), or the index of the page as a number)<br/>**Expected Value Type:** `Array of Strings`.|
+`incrementPageNotif`|Notifications that increment the page.<br/>**Expected Value Type:** `Array of Strings`.|
+`decrementPageNotif`|Notifications that decrement the page.<br/>**Expected Value Type:** `Array of Strings`.|
 
-Configurations for modules used with Page Selector are done in the normal fassion in their own object.
+Configurations for modules used with Page Selector are done in the normal fashion in their own object.
 
 ## Integration With Other Modules
 In order for an external module to interact with Page Selector, the other module must send a notification in the form of a string to `"PAGE_SELECT"` with a payload of the **page name** or of the **page index**.<br/><br/>
