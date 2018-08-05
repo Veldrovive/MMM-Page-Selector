@@ -92,6 +92,8 @@ The configuration for `MMM-Weather-Now` will:
 The configuration for `MMM-page-indicator` will:
 * `position`: Since this will be on all pages, setting the position to be "bottom_center" means that it will always be displayed there.
 * `pages`: Means that reguardless of the page, `MMM-page-indicator` will be shown.
+
+Note: if 3rd party modules fail to hide correctly, a [potential fix](https://github.com/Veldrovive/MMM-Page-Selector/issues/2) is to remove the position prop.
 ## Configuration
 Option|Description
 ------|-----------
