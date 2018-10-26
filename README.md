@@ -76,7 +76,7 @@ modules: [
 ```
 The configuration for `MMM-Page-Selector` will:
 * `position`: Make the title of the page appear at the top_center position.
-* `page`: Display the page with the name of "main" on startup.
+* `defaultPage`: Display the page with the name of "main" on startup.
 * `displayTitle`: Display the page name at the defined position since it is true.
 
 * `selectPageNotif`: Sending a notification to "SELECT_PAGE" will now set the page to the payload. By default, this already includes "PAGE_SELECT" and "PAGE_CHANGED".
