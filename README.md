@@ -48,7 +48,7 @@ For example, specifying `pages: {"main": "bottom_center", "fun": "top_right"}` w
 
 If `pages` is set to "all", then the module will always appear in the position defined by the `position` prop.
 
-Example of a complete config for a very simple mirror:
+Example of a complete config for a very simple mirror (Click [here](https://github.com/Veldrovive/MMM-Page-Selector/issues/3#issuecomment-433203300) for a more complicated example):
 ```js
 modules: [
     {
