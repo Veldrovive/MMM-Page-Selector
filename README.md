@@ -14,6 +14,7 @@ git clone https://github.com/Veldrovive/MMM-Page-Selector.git
 ```
 
 ## Usage
+#### There are two options for creating pages. If in doubt, use the first one:
 ```js
 modules[
     ...
@@ -92,6 +93,45 @@ The configuration for `MMM-Weather-Now` will:
 The configuration for `MMM-page-indicator` will:
 * `position`: Since this will be on all pages, setting the position to be "bottom_center" means that it will always be displayed there.
 * `pages`: Means that reguardless of the page, `MMM-page-indicator` will be shown.
+
+#### The second method for defining pages:
+```
+address: "localhost",
+port: 8081,
+ipWhitelist: ["127.0.0.1", "::ffff:127.0.0.1", "::1"],
+modules: [
+    ...
+],
+pages: {
+    "main": {
+        "calendar": "top_left",
+        "MMM-Bob-Ross": "bottom_left",
+        "clock": "top_right",
+        "weatherforecast": "bottom_right",
+        "newsfeed": "bottom_center"
+    },
+    "fun": {
+        "clock": "top_left",
+        "MMM-Lunartic": "bottom_right",
+        "MMM-Astronauts": "bottom_left",
+        "MMM-Reddit": "top_right"
+    }
+},
+exclusions: [
+    "alert",
+    "MMM-page-indicator",
+	"MMM-Voice-Commands"
+]
+```
+Both `pages` and `exclusions` are on the same level as `modules`
+
+`pages`: 
+
+* This contains objects where the key is the page name and the members are define the module name and position. 
+    
+`exclusions`: 
+
+* This works the same as `pages: "all"` from the first method. The module is shown on all pages and the position is defined by the position prop
 
 Note: if 3rd party modules fail to hide correctly, a [potential fix](https://github.com/Veldrovive/MMM-Page-Selector/issues/2) is to remove the position prop.
 ## Configuration
