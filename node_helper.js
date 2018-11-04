@@ -36,36 +36,57 @@ module.exports = NodeHelper.create({
 		const self = this;
 
 		const configPath = path.join(__dirname, "../..", "config/config.js");
-		const modules = require(configPath).modules;
-
-		const pageList = [];
+		const config = require(configPath)
 		const pageConfig = {};
-		const exlusions = [];
-
-		modules.forEach(module => {
-			const name = module.module;
-			const pages = module.pages;
-
-			if(typeof pages === "object"){
-				const modulePages = Object.keys(pages);
-				modulePages.forEach(page => {
-					if(pageList.indexOf(page) === -1){
-						pageList.push(page);
-						pageConfig[page] = [];
-					}
+		let exclusions = [];
+		// There are two options when defining pages and locations.
+		// If the pages are explicitly defined then that definition is used. 
+		// If they are not, then the config for each module is searched to find the pages key
+		if(config.hasOwnProperty("pages")){
+			const pages = config.pages;
+			page_names = Object.keys(pages)
+			page_names.forEach(page => {
+				pageConfig[page] = []
+				modules = Object.keys(pages[page])
+				modules.forEach(name => {
 					pageConfig[page].push({
 						"module": name,
-						"position": pages[page]
+						"position": pages[page][name]
 					})
 				})
-			}else if(typeof pages === "string"){
-				if(pages.toLowerCase() === "all"){
-					exlusions.push(name);
-				}
+			})
+			if(config.hasOwnProperty("exclusions")){
+				exclusions = config.exclusions
 			}
-		});
-		console.log("Sending config to selector");
+		}else{
+			const modules = config.modules;
+			const pageList = [];
+
+			modules.forEach(module => {
+				const name = module.module;
+				const pages = module.pages;
+
+				if(typeof pages === "object"){
+					const modulePages = Object.keys(pages);
+					modulePages.forEach(page => {
+						if(pageList.indexOf(page) === -1){
+							pageList.push(page);
+							pageConfig[page] = [];
+						}
+						pageConfig[page].push({
+							"module": name,
+							"position": pages[page]
+						})
+					})
+				}else if(typeof pages === "string"){
+					if(pages.toLowerCase() === "all"){
+						exclusions.push(name);
+					}
+				}
+			});
+		}
+		console.log("Sending config to page selector");
 		self.sendSocketNotification("SET_PAGE_CONFIG", pageConfig);
-		self.sendSocketNotification("SET_EXCLUSIONS_CONFIG", exlusions);
+		self.sendSocketNotification("SET_EXCLUSIONS_CONFIG", exclusions);
 	}
 })
