@@ -66,7 +66,7 @@ Module.register("MMM-Page-Selector", {
 	},
 
 	getModuleRef: function(module){
-		var moduleRef = document.getElementsByClassName(module.name)[0];
+		var moduleRef = document.getElementById(module.data.identifier);
 		return moduleRef;
 	},
 
@@ -116,16 +116,16 @@ Module.register("MMM-Page-Selector", {
 			var modules = MM.getModules();
 			modules.enumerate(module => {
 				if(module.name !== self.name){
-					if(self.neverHide.indexOf(module.name) === -1){
+					if(self.neverHide.indexOf(module.data.identifier) === -1){
 						module.hide(500);
 					}
 					setTimeout(() => {
-						if(findIndex(page, {module: module.name}) === -1 && self.neverHide.indexOf(module.name) === -1){
+						if(findIndex(page, {identifier: module.data.identifier}) === -1 && self.neverHide.indexOf(module.data.identifier) === -1){
 							//If the module is not in the page object and it is not included in the neverHide object, hide it
 							module.hide(500);
-						}else if(self.neverHide.indexOf(module.name) === -1){
+						}else if(self.neverHide.indexOf(module.data.identifier) === -1){
 							//If the module is in the page object and is not included the neverHide object, move it to the correct location
-							self.moveRefToLoc(self.getModuleRef(module), page[findIndex(page, {module: module.name})].position);
+							self.moveRefToLoc(self.getModuleRef(module), page[findIndex(page, {identifier: module.data.identifier})].position);
 							module.show(500);
 						}else{
 							module.show(0);

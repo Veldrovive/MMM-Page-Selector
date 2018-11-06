@@ -43,26 +43,28 @@ module.exports = NodeHelper.create({
 		// If the pages are explicitly defined then that definition is used. 
 		// If they are not, then the config for each module is searched to find the pages key
 		if(config.hasOwnProperty("pages")){
-			const pages = config.pages;
+			// Currently Not Functional
+			// TODO: Make this work with the new id system
+			/*const pages = config.pages;
 			page_names = Object.keys(pages)
-			page_names.forEach(page => {
+			page_names.forEach((page, index) => {
 				pageConfig[page] = []
 				modules = Object.keys(pages[page])
 				modules.forEach(name => {
 					pageConfig[page].push({
 						"module": name,
-						"position": pages[page][name]
+						"position": pages[page][name],
 					})
 				})
 			})
 			if(config.hasOwnProperty("exclusions")){
 				exclusions = config.exclusions
-			}
+			}*/
 		}else{
 			const modules = config.modules;
 			const pageList = [];
 
-			modules.forEach(module => {
+			modules.forEach((module, index) => {
 				const name = module.module;
 				const pages = module.pages;
 
@@ -74,13 +76,13 @@ module.exports = NodeHelper.create({
 							pageConfig[page] = [];
 						}
 						pageConfig[page].push({
-							"module": name,
-							"position": pages[page]
+							"position": pages[page],
+							"identifier": `module_${index}_${name}`
 						})
 					})
 				}else if(typeof pages === "string"){
 					if(pages.toLowerCase() === "all"){
-						exclusions.push(name);
+						exclusions.push(`module_${index}_${name}`);
 					}
 				}
 			});
