@@ -45,21 +45,49 @@ module.exports = NodeHelper.create({
 		if(config.hasOwnProperty("pages")){
 			// Currently Not Functional
 			// TODO: Make this work with the new id system
-			/*const pages = config.pages;
-			page_names = Object.keys(pages)
-			page_names.forEach((page, index) => {
-				pageConfig[page] = []
-				modules = Object.keys(pages[page])
-				modules.forEach(name => {
-					pageConfig[page].push({
-						"module": name,
-						"position": pages[page][name],
+			const pages = config.pages;
+			const modules = config.modules;
+			const pageNames = Object.keys(pages);
+
+			pageNames.forEach(page_name => {
+				const used_ids = [];
+				pageConfig[page_name] = [];
+				const page = pages[page_name];
+				const page_module_names = Object.keys(page);
+				const page_store = {};
+
+				modules.forEach((module, index) => {
+					const module_name = module.module;
+					const name = module.name;
+					const id = `module_${index}_${module_name}`;
+					if(page_module_names.includes(module_name)){
+						page_store[id] = page[module_name]
+					}
+					if(name !== undefined && page_module_names.includes(name)){
+						page_store[id] = page[name]
+					}
+				})
+				pagePositions = []
+				Object.keys(page_store).forEach(id => {
+					pagePositions.push({
+						"position": page_store[id],
+						"identifier": id
 					})
 				})
+				pageConfig[page_name] = pagePositions
 			})
 			if(config.hasOwnProperty("exclusions")){
-				exclusions = config.exclusions
-			}*/
+				const excluded_names = config.exclusions;
+				modules.forEach((module, index) => {
+					const module_name = module.module;
+					const name = module.name;
+					const id = `module_${index}_${module_name}`;
+
+					if(excluded_names.includes(module_name) || excluded_names.includes(name)){
+						exclusions.push(id)
+					}
+				})
+			}
 		}else{
 			const modules = config.modules;
 			const pageList = [];

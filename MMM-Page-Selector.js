@@ -103,6 +103,8 @@ Module.register("MMM-Page-Selector", {
 	setUpPage: function(pageName) {
 		const self = this;
 		var page = self.pages[pageName];
+		console.log(self.pages);
+		console.log(self.neverHide)
 		if(page !== undefined){
 			//Set title once the page has been identified
 			self.page = pageName;
