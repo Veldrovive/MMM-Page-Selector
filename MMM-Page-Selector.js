@@ -71,6 +71,11 @@ Module.register("MMM-Page-Selector", {
 	},
 
 	moveRefToLoc: function(ref, loc){
+		const self = this;
+		function insertAfter(newNode, referenceNode) {
+		    referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+		}
+
 		//Defines where modules will be with a map between the position string and the css class
 		var locations = {
 			"top_bar": "region top bar",
@@ -97,7 +102,12 @@ Module.register("MMM-Page-Selector", {
 				container = node;
 			}
 		})
-		container.prepend(ref);
+		if(loc === "top_bar"){
+			console.log(self.id)
+			insertAfter(ref, document.getElementById(self.id))
+		}else{
+			container.prepend(ref);
+		}
 	},
 
 	setUpPage: function(pageName) {
@@ -182,6 +192,9 @@ Module.register("MMM-Page-Selector", {
 		}else if(notification === "MODULE_DOM_CREATED"){
 			const modules = MM.getModules();
 			modules.enumerate(module => {
+				if(module.name === self.name){
+					self.id = module.data.identifier
+				}
 				module.hide(0);
 			})
 
