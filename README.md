@@ -15,6 +15,7 @@ git clone https://github.com/Veldrovive/MMM-Page-Selector.git
 
 ## Usage
 #### There are two options for creating pages. If in doubt, use the first one:
+If there are too many pages and using the `page` prop becomes confusing. Switch to the second method. It is slightly more complicated to set up, but is more clear when many modules are at play.
 ```js
 modules[
     ...
@@ -95,43 +96,83 @@ The configuration for `MMM-page-indicator` will:
 * `pages`: Means that reguardless of the page, `MMM-page-indicator` will be shown.
 
 #### The second method for defining pages:
-```
+```js
 address: "localhost",
 port: 8081,
 ipWhitelist: ["127.0.0.1", "::ffff:127.0.0.1", "::1"],
 modules: [
     ...
+    {
+        module: 'MMM-DWD-WarnWeather',
+	...
+    },
+    {
+        module: 'MMM-DWD-WarnWeather',
+	...
+    },
+    {
+        module: 'clock',
+        name: "middle_clock",
+	...
+    },
+    {
+        module: 'clock',
+        name: "bottom_middle",
+	...
+    },
+    {
+	module: "MMM-PublicTransportHafas",
+	name: "transport_right",
+	...
+    },
+    {
+	module: "MMM-PublicTransportHafas",
+	name: "transport_right",
+	...
+    },
+    {
+	module: "MMM-PublicTransportHafas",
+	name: "transport_left",
+	...
+    },
+    {
+	module: "MMM-PublicTransportHafas",
+	name: "transport_left",
+	...
+    },
+    {
+        module: "MMM-page-indicator",
+	...
+    }
 ],
 pages: {
-    "main": {
-        "calendar": "top_left",
-        "MMM-Bob-Ross": "bottom_left",
-        "clock": "top_right",
-        "weatherforecast": "bottom_right",
-        "newsfeed": "bottom_center"
+    main: {
+        "MMM-DWD-WarnWeather": "top_bar",
+	"middle_clock": "middle_center",
+	"bottom_clock": "bottom_center"
     },
-    "fun": {
-        "clock": "top_left",
-        "MMM-Lunartic": "bottom_right",
-        "MMM-Astronauts": "bottom_left",
-        "MMM-Reddit": "top_right"
+    second: {
+    	"transport_right": "bottom_right",
+	"transport_left": "bottom_left"
     }
 },
 exclusions: [
-    "alert",
-    "MMM-page-indicator",
-	"MMM-Voice-Commands"
+    "MMM-page-indicator"
 ]
 ```
 Both `pages` and `exclusions` are on the same level as `modules`
 
 `pages`: 
 
-* This contains objects where the key is the page name and the members are define the module name and position. 
+* This contains objects where the key is the page name and the members are define the module names and positions. 
+  * The new `name` prop comes into play here. Both `module` and `name` are simply used as selectors. If you want to assign all `clock` modules to a certain position, then `"clock": "bottom_center"` will function, but if you want to have some clocks in some positions and some in others, then you assign them a `name` which can then be used as a selector. In this case, the groups used are:
+    * `MMM-DWD-WarnWeather`: This one selects all the `MMM-DWD-WarnWeather` modules. An important note is that when a module name is used as the selector, it is overriden by usage of a `name` prop as the selector.
+    * `middle_clock` and `bottom_clock`: Both of these only contain one member, a clock. They still function normally, but now the user can choose the positions of each clock individually instead of having to move them as a group as would happen if `clock` was used as the selector.
+    * `transport_right` and `transport_left`: Both of these have multiple members and are used as ways of grouping modules so that they can be moved as a section instead of having to specify them individually. This is used if a set of modules should always be together.
     
 `exclusions`: 
 
-* This works the same as `pages: "all"` from the first method. The module is shown on all pages and the position is defined by the position prop
+* This works the same as `pages: "all"` from the first method. The module is shown on all pages and the position is defined by the position prop. The only difference is that the selector can be the `module name` or the `name` prop.
 
 Note: if 3rd party modules fail to hide correctly, a [potential fix](https://github.com/Veldrovive/MMM-Page-Selector/issues/2) is to remove the position prop.
 ## Configuration
