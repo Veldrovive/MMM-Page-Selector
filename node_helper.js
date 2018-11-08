@@ -51,7 +51,7 @@ module.exports = NodeHelper.create({
 
 			pageNames.forEach(page_name => {
 				const used_ids = [];
-				pageConfig[page_name] = [];
+				pageConfig[page_name.toLowerCase()] = [];
 				const page = pages[page_name];
 				const page_module_names = Object.keys(page);
 				const page_store = {};
@@ -74,7 +74,7 @@ module.exports = NodeHelper.create({
 						"identifier": id
 					})
 				})
-				pageConfig[page_name] = pagePositions
+				pageConfig[page_name.toLowerCase()] = pagePositions
 			})
 			if(config.hasOwnProperty("exclusions")){
 				const excluded_names = config.exclusions;
@@ -101,9 +101,9 @@ module.exports = NodeHelper.create({
 					modulePages.forEach(page => {
 						if(pageList.indexOf(page) === -1){
 							pageList.push(page);
-							pageConfig[page] = [];
+							pageConfig[page.toLowerCase()] = [];
 						}
-						pageConfig[page].push({
+						pageConfig[page.toLowerCase()].push({
 							"position": pages[page],
 							"identifier": `module_${index}_${name}`
 						})
