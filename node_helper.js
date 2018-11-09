@@ -24,7 +24,6 @@ module.exports = NodeHelper.create({
 
 	socketNotificationReceived: function(notification, payload) {
 		const self = this;
-
 		if(notification === "RELAY_PAGE_SELECT"){
 			self.sendPageChange(payload);
 		}else if(notification === "UPDATE_PAGES"){
@@ -43,8 +42,6 @@ module.exports = NodeHelper.create({
 		// If the pages are explicitly defined then that definition is used. 
 		// If they are not, then the config for each module is searched to find the pages key
 		if(config.hasOwnProperty("pages")){
-			// Currently Not Functional
-			// TODO: Make this work with the new id system
 			const pages = config.pages;
 			const modules = config.modules;
 			const pageNames = Object.keys(pages);

@@ -95,6 +95,10 @@ Module.register("MMM-Page-Selector", {
 
 		//Search for the correct container to append the module into
 		var moveToRef = document.getElementsByClassName(locations[loc])[0];
+		if(moveToRef === undefined){
+			console.error("Incorrect Position string for module:", ref);
+			return false;
+		}
 		var containers = moveToRef.childNodes;
 		var container;
 		containers.forEach(node => {
@@ -113,8 +117,6 @@ Module.register("MMM-Page-Selector", {
 	setUpPage: function(pageName) {
 		const self = this;
 		var page = self.pages[pageName];
-		console.log(self.pages);
-		console.log(self.neverHide)
 		if(page !== undefined){
 			//Set title once the page has been identified
 			self.page = pageName;
@@ -129,22 +131,22 @@ Module.register("MMM-Page-Selector", {
 			modules.enumerate(module => {
 				if(module.name !== self.name){
 					if(self.neverHide.indexOf(module.data.identifier) === -1){
-						module.hide(500);
+						module.hide(500, { lockString: self.identifier });
 					}
 					setTimeout(() => {
 						if(findIndex(page, {identifier: module.data.identifier}) === -1 && self.neverHide.indexOf(module.data.identifier) === -1){
 							//If the module is not in the page object and it is not included in the neverHide object, hide it
-							module.hide(500);
+							module.hide(500, { lockString: self.identifier });
 						}else if(self.neverHide.indexOf(module.data.identifier) === -1){
 							//If the module is in the page object and is not included the neverHide object, move it to the correct location
 							self.moveRefToLoc(self.getModuleRef(module), page[findIndex(page, {identifier: module.data.identifier})].position);
-							module.show(500);
+							module.show(500, { lockString: self.identifier });
 						}else{
-							module.show(0);
+							module.show(0, { lockString: self.identifier });
 						}
 					}, 500)
 				}else{
-					module.show(0);
+					module.show(0, { lockString: self.identifier });
 				}
 			});
 		}
@@ -195,7 +197,7 @@ Module.register("MMM-Page-Selector", {
 				if(module.name === self.name){
 					self.id = module.data.identifier
 				}
-				module.hide(0);
+				module.hide(0, { lockString: self.identifier });
 			})
 
 			self.domLoaded = true;
