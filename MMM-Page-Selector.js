@@ -58,7 +58,6 @@ Module.register("MMM-Page-Selector", {
 			const pages = Object.keys(self.pages)
 			self.sendNotification("MAX_PAGES_CHANGED", pages.length);
 			if(pages.indexOf(self.page) === -1){
-				console.log("Setting page to",pages[0]);
 				self.page = pages[0];
 			}
 			self.setUpPage(self.page);
@@ -107,7 +106,6 @@ Module.register("MMM-Page-Selector", {
 			}
 		})
 		if(loc === "top_bar"){
-			console.log(self.id)
 			insertAfter(ref, document.getElementById(self.id))
 		}else{
 			container.prepend(ref);
@@ -156,7 +154,6 @@ Module.register("MMM-Page-Selector", {
 	//if the payload is an integer, the index of the page is selected
 	notificationReceived: function(notification, payload, sender) {
 		const self = this;
-		console.log("Notification:",notification, payload, sender)
 
 		function incrementPage(){
 			const pageArray = Object.keys(self.pages);
@@ -174,7 +171,6 @@ Module.register("MMM-Page-Selector", {
 
 		function selectPage(info){
 			const payloadToNum = WtoN.convert(info);
-			console.log("SELECTING PAGE:",payloadToNum)
 			if(isNaN(payloadToNum)){
 				self.sendSocketNotification("RELAY_PAGE_SELECT", info);
 			}else{

@@ -112,7 +112,6 @@ module.exports = NodeHelper.create({
 				}
 			});
 		}
-		console.log("Sending config to page selector");
 		self.sendSocketNotification("SET_PAGE_CONFIG", pageConfig);
 		self.sendSocketNotification("SET_EXCLUSIONS_CONFIG", exclusions);
 	}
