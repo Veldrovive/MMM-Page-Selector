@@ -61,7 +61,10 @@ modules: [
             displayTitle: true,
             selectPageNotif: ["SELECT_PAGE"],
             incrementPageNotif: ["PAGE_UP"],
-            decrementPageNotif: ["PAGE_DOWN"]
+            decrementPageNotif: ["PAGE_DOWN"],
+	    autoChange: {
+	    	interval: 100
+	    }
         }
     },
     {
@@ -86,6 +89,9 @@ The configuration for `MMM-Page-Selector` will:
 * `incrementPageNotif`: Sending a notification to "PAGE_UP" will now increment the page. By default, this already includes "INCREMENT_PAGE".
 
 * `decrementPageNotif`: Sending a notification to "PAGE_DOWN" will now decrement the page. By default, this already includes "DECREMENT_PAGE".
+
+* `autoChange`: Used for automatically changing the page.
+  * `interval`: Changes the page automatically every certain amount of time. In this case, the next page will be displayed every 100 seconds.
 
 The configuration for `MMM-Weather-Now` will:
 * `position`: This doesn't matter, it just has to be set so Magic Mirror will render the module.
@@ -180,9 +186,16 @@ Option|Description
 ------|-----------
 `defaultPage`|Default page to display when the mirror boots up.<br/>**Expected Value Type:** `String`.|
 `displayTitle`|Whether or not to display the page title.<br/>**Expected Value Type:** `boolean`.|
-`selectPageNotif`|Which notifications should be used to set the page. The payload of these notifications should be the name of the page, the index of the page written out ("one", "two",...), or the index of the page as a number)<br/>**Expected Value Type:** `Array of Strings`.|
+`selectPageNotif`|Which notifications should be used to set the page. The payload of these notifications should be the name of the page, the index of the page written out ("one", "two",...), or the index of the page as a number.<br/>**Expected Value Type:** `Array of Strings`.|
 `incrementPageNotif`|Notifications that increment the page.<br/>**Expected Value Type:** `Array of Strings`.|
 `decrementPageNotif`|Notifications that decrement the page.<br/>**Expected Value Type:** `Array of Strings`.|
+`autoChange`|Options for automatically changing the current page.<br/>**Expected Value Type:** `Object`.|
+
+`autoChange`:
+
+Currently, autoChange has only one option, `interval`.
+
+`interval` takes a number as it's value and defines the number of seconds before the next page is diplayed.
 
 Configurations for modules used with Page Selector are done in the normal fashion in their own object.
 
