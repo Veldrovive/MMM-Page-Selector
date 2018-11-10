@@ -7,7 +7,6 @@ Module.register("MMM-Page-Selector", {
 		selectPageNotif: [],
 		incrementPageNotif: [],
 		decrementPageNotif: []
-
 	},
 
 	requiresVersion: "2.1.0",
@@ -59,13 +58,12 @@ Module.register("MMM-Page-Selector", {
 			if(pages.indexOf(self.page) === -1){
 				self.page = pages[0];
 			}
-			self.setUpPage(self.page);
+			self.changePage(self.page);
 		}
 	},
 
 	getModuleRef: function(module){
-		var moduleRef = document.getElementById(module.data.identifier);
-		return moduleRef;
+		return document.getElementById(module.data.identifier);
 	},
 
 	moveRefToLoc: function(ref, loc){
@@ -149,45 +147,49 @@ Module.register("MMM-Page-Selector", {
 		}
 	},
 
+	//Changes to the page given by the {page} parameter. If increment is true, then if page is a number then the page
+	//will be incremented by that number. Otherwise it will simply select the page at that index
+	changePage: function(page, increment){
+		const self = this;
+		function mod(n, m) {
+		  return ((n % m) + m) % m;
+		}
+
+		if(typeof page === "number"){
+			const pageArray = Object.keys(self.pages);
+			if(increment){
+				const currentPage = pageArray.indexOf(self.page);
+				self.setUpPage(pageArray[mod(currentPage + page, pageArray.length)]);
+			}else{
+				if(page >= pageArray.length || page < 0){
+					Log.error("Page index out of bounds");
+				}else{
+					self.setUpPage(pageArray[page])
+				}
+			}
+		}else if(typeof page === "string"){
+			self.setUpPage(page.toLowerCase().trim());
+		}else{
+			Log.error("Tried to change to a page that is not a number or a string")
+		}
+	},
+
 	//If an external module wants to change the page, it sends a notification to PAGE_SELECT with the payload as the page name
 	//if the payload is an integer, the index of the page is selected
 	notificationReceived: function(notification, payload, sender) {
 		const self = this;
 
-		function incrementPage(){
-			const pageArray = Object.keys(self.pages);
-			const currentPage = pageArray.indexOf(self.page);
-			const nextPage = currentPage+1 > pageArray.length-1 ? 0 : currentPage+1;
-			self.setUpPage(pageArray[nextPage]);
-		}
-
-		function decrementPage(){
-			const pageArray = Object.keys(self.pages);
-			const currentPage = pageArray.indexOf(self.page);
-			const nextPage = currentPage-1 < 0 ? pageArray.length-1 : currentPage-1;
-			self.setUpPage(pageArray[nextPage]);
-		}
-
-		function selectPage(info){
-			const payloadToNum = WtoN.convert(info);
-			if(isNaN(payloadToNum)){
-				self.setUpPage(info);
-			}else{
-				const key = Object.keys(self.pages)[payloadToNum];
-				if(key !== undefined){
-					self.setUpPage(key);
-				}else{
-					Log.error("Tried to navigate to a non-existent page:", info);
-				}
-			}
+		function selectPage(page){
+			const payloadToNum = WtoN.convert(page);
+			self.changePage(isNaN(payloadToNum) ? page : payloadToNum)
 		}
 
 		if(self.selectPageNotif.includes(notification)){
 			selectPage(payload);
 		}else if(self.incrementPageNotif.includes(notification)){
-			incrementPage();
+			self.changePage(1, true)
 		}else if(self.decrementPageNotif.includes(notification)){
-			decrementPage();
+			self.changePage(-1, true)
 		}else if(notification === "MODULE_DOM_CREATED"){
 			MM.getModules().enumerate(module => {
 				module.hide(0, { lockString: self.identifier });
@@ -212,7 +214,7 @@ Module.register("MMM-Page-Selector", {
 			self.exclusionsLoaded = true;
 			self.init();
 		}else if(notification === 'PAGE_SELECT'){
-			self.setUpPage(payload);
+			self.changePage(payload);
 		}
 	},
 

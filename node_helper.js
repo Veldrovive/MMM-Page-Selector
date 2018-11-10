@@ -16,17 +16,9 @@ module.exports = NodeHelper.create({
 		});
 	},
 
-	sendPageChange: function(pageId) {
-		const self = this;
-
-		self.sendSocketNotification("PAGE_SELECT", pageId.toLowerCase());
-	},
-
 	socketNotificationReceived: function(notification, payload) {
 		const self = this;
-		if(notification === "RELAY_PAGE_SELECT"){
-			self.sendPageChange(payload);
-		}else if(notification === "UPDATE_PAGES"){
+		if(notification === "UPDATE_PAGES"){
 			self.getModulePages();
 		}
 	},
