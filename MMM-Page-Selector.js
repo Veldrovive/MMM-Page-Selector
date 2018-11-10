@@ -20,6 +20,22 @@ Module.register("MMM-Page-Selector", {
 		this.selectPageNotif = ["PAGE_SELECT", "PAGE_CHANGED"].concat(this.config.selectPageNotif);
 		this.incrementPageNotif = ["INCREMENT_PAGE"].concat(this.config.incrementPageNotif);
 		this.decrementPageNotif = ["DECREMENT_PAGE"].concat(this.config.decrementPageNotif);
+
+		if(this.config.hasOwnProperty("autoChange")){
+			autoChange = this.config.autoChange;
+			const methods = Object.keys(autoChange)
+			if(methods.includes("interval")){
+				this.startChangeInterval(autoChange.interval);
+			}
+		}
+	},
+
+	startChangeInterval: function(interval){
+		const self = this;
+		console.log("Starting page change interval at",interval,"seconds")
+		self.changeInterval = setInterval(() => {
+			self.changePage(1, true)
+		}, interval*1000)
 	},
 
 	getStyles: function () {
