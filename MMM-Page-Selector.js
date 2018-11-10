@@ -46,7 +46,6 @@ Module.register("MMM-Page-Selector", {
 
 	getScripts: function() {
 		return[
-			this.file("resources/find.js"),
 			this.file("resources/numConvert.js"),
 		]
 	},
