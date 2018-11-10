@@ -156,6 +156,7 @@ Module.register("MMM-Page-Selector", {
 	//if the payload is an integer, the index of the page is selected
 	notificationReceived: function(notification, payload, sender) {
 		const self = this;
+		console.log("Notification:",notification, payload, sender)
 
 		function incrementPage(){
 			const pageArray = Object.keys(self.pages);
@@ -173,8 +174,9 @@ Module.register("MMM-Page-Selector", {
 
 		function selectPage(info){
 			const payloadToNum = WtoN.convert(info);
+			console.log("SELECTING PAGE:",payloadToNum)
 			if(isNaN(payloadToNum)){
-				self.sendSocketNotification("RELAY_PAGE_SELECT", payloadToNum+1);
+				self.sendSocketNotification("RELAY_PAGE_SELECT", info);
 			}else{
 				const key = Object.keys(self.pages)[payloadToNum];
 				if(key !== undefined){
