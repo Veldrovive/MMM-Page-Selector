@@ -39,7 +39,6 @@ Module.register("MMM-Page-Selector", {
 	getDom: function() {
 		var wrapper = document.createElement("div");
 		wrapper.className += "page-title"
-		//If the module is configured to show a title, display it... easy enough
 		if(this.displayTitle){
 			if(this.page !== ''){
 				wrapper.innerHTML = `${this.titleCase(this.page)}`;
@@ -94,8 +93,8 @@ Module.register("MMM-Page-Selector", {
 
 		//Search for the correct container to append the module into
 		var moveToRef = document.getElementsByClassName(locations[loc])[0];
-		if(moveToRef === undefined){
-			console.error("Incorrect Position string for module:", ref);
+		if(typeof moveToRef === "undefined"){
+			Log.error("Incorrect Position string for module:", ref);
 			return false;
 		}
 		var containers = moveToRef.childNodes;
@@ -106,7 +105,7 @@ Module.register("MMM-Page-Selector", {
 			}
 		})
 		if(loc === "top_bar"){
-			insertAfter(ref, document.getElementById(self.id))
+			insertAfter(ref, self.getModuleRef(self))
 		}else{
 			container.prepend(ref);
 		}
@@ -125,28 +124,28 @@ Module.register("MMM-Page-Selector", {
 			self.sendNotification("PAGE_CHANGED", indexOfPage);
 
 			//Code for moving and changing visibility for certain modules
-			var modules = MM.getModules();
-			modules.enumerate(module => {
-				if(module.name !== self.name){
-					if(self.neverHide.indexOf(module.data.identifier) === -1){
+			MM.getModules()
+				.enumerate(module => {
+					if(!self.neverHide.includes(module.data.identifier)){
 						module.hide(500, { lockString: self.identifier });
 					}
-					setTimeout(() => {
-						if(findIndex(page, {identifier: module.data.identifier}) === -1 && self.neverHide.indexOf(module.data.identifier) === -1){
-							//If the module is not in the page object and it is not included in the neverHide object, hide it
-							module.hide(500, { lockString: self.identifier });
-						}else if(self.neverHide.indexOf(module.data.identifier) === -1){
-							//If the module is in the page object and is not included the neverHide object, move it to the correct location
-							self.moveRefToLoc(self.getModuleRef(module), page[findIndex(page, {identifier: module.data.identifier})].position);
-							module.show(500, { lockString: self.identifier });
-						}else{
-							module.show(0, { lockString: self.identifier });
-						}
-					}, 500)
-				}else{
-					module.show(0, { lockString: self.identifier });
-				}
-			});
+				})
+
+			const identifiers = page.map(x => x.identifier);
+			setTimeout(() => MM.getModules()
+				.enumerate(module => {
+					if(self.neverHide.includes(module.data.identifier)){
+						module.show(0, { lockString: self.identifier })
+					}
+					if(identifiers.includes(module.data.identifier)){
+						const id = module.data.identifier;
+						self.moveRefToLoc(self.getModuleRef(module), page[identifiers.indexOf(id)].position);
+						module.show(500, { lockString: self.identifier });
+					}
+				}), 500
+			)
+		}else{
+			Log.error("Tried to navigate to a non-existent page: ",pageName);
 		}
 	},
 
@@ -159,26 +158,26 @@ Module.register("MMM-Page-Selector", {
 			const pageArray = Object.keys(self.pages);
 			const currentPage = pageArray.indexOf(self.page);
 			const nextPage = currentPage+1 > pageArray.length-1 ? 0 : currentPage+1;
-			self.sendSocketNotification("RELAY_PAGE_SELECT", pageArray[nextPage]);
+			self.setUpPage(pageArray[nextPage]);
 		}
 
 		function decrementPage(){
 			const pageArray = Object.keys(self.pages);
 			const currentPage = pageArray.indexOf(self.page);
 			const nextPage = currentPage-1 < 0 ? pageArray.length-1 : currentPage-1;
-			self.sendSocketNotification("RELAY_PAGE_SELECT", pageArray[nextPage]);
+			self.setUpPage(pageArray[nextPage]);
 		}
 
 		function selectPage(info){
 			const payloadToNum = WtoN.convert(info);
 			if(isNaN(payloadToNum)){
-				self.sendSocketNotification("RELAY_PAGE_SELECT", info);
+				self.setUpPage(info);
 			}else{
 				const key = Object.keys(self.pages)[payloadToNum];
 				if(key !== undefined){
-					self.sendSocketNotification("RELAY_PAGE_SELECT", key);
+					self.setUpPage(key);
 				}else{
-					Log.log("Tried to navigate to a non-existant page:",payloadToNum, key);
+					Log.error("Tried to navigate to a non-existent page:", info);
 				}
 			}
 		}
@@ -190,11 +189,7 @@ Module.register("MMM-Page-Selector", {
 		}else if(self.decrementPageNotif.includes(notification)){
 			decrementPage();
 		}else if(notification === "MODULE_DOM_CREATED"){
-			const modules = MM.getModules();
-			modules.enumerate(module => {
-				if(module.name === self.name){
-					self.id = module.data.identifier
-				}
+			MM.getModules().enumerate(module => {
 				module.hide(0, { lockString: self.identifier });
 			})
 
@@ -213,6 +208,7 @@ Module.register("MMM-Page-Selector", {
 			self.init();
 		}else if (notification === "SET_EXCLUSIONS_CONFIG"){
 			self.neverHide = payload;
+			self.neverHide.push(self.identifier)
 			self.exclusionsLoaded = true;
 			self.init();
 		}else if(notification === 'PAGE_SELECT'){
