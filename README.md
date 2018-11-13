@@ -14,6 +14,7 @@ git clone https://github.com/Veldrovive/MMM-Page-Selector.git
 ```
 
 ## Usage
+For all usage, including the standard `position` prop in the module config is allowed, but is not necessary and does not have any effect.
 #### There are two options for creating pages. If in doubt, use the first one:
 If there are too many pages and using the `page` prop becomes confusing. Switch to the second method. It is slightly more complicated to set up, but is more clear when many modules are at play.
 ```js
@@ -31,7 +32,7 @@ modules[
     //Example of the config for a module to be shown on pages: "pageNameOne" and "pageNameTwo"
     {
         module: "MMM-any-other",
-        position: "bottom_center", //Or any other position, this doesnt matter unless "pages" is set to "all"
+        //position: "bottom_center", It is NOT neccesary to have a position prop anymore although having one does not have any effect
         pages: {"pageNameOne": "position", "pageNameTwo": "another_position"},
         config: {}
     },
@@ -39,7 +40,6 @@ modules[
     //Example of the config for a module to be shown on all pages
     {
         module: "MMM-any-other",
-        position: "bottom_center", //This value defines the position that the module will always appear in
         pages: "all",
         config: {}
     }
@@ -69,12 +69,11 @@ modules: [
     },
     {
         module: "MMM-Weather-Now",
-        position: "bottom_center",
         pages: {main: "top_right", weather: "bottom_left"}
     },
     {
         module: "MMM-page-indicator",
-        position: "bottom_center",
+	position: "bottom_bar", //A position prop is necessary in this case since the module is appearing on all pages
         pages: "all"
     }
 ]
@@ -94,12 +93,10 @@ The configuration for `MMM-Page-Selector` will:
   * `interval`: Changes the page automatically every certain amount of time. In this case, the next page will be displayed every 100 seconds.
 
 The configuration for `MMM-Weather-Now` will:
-* `position`: This doesn't matter, it just has to be set so Magic Mirror will render the module.
 * `pages`: Each key defines a page and each value defines the position on that page. This means that `MMM-Weather-Now` will be rendered at the top right when on the "main" page and on the bottom left when on the "weather" page.
 
 The configuration for `MMM-page-indicator` will:
-* `position`: Since this will be on all pages, setting the position to be "bottom_center" means that it will always be displayed there.
-* `pages`: Means that reguardless of the page, `MMM-page-indicator` will be shown.
+* `pages`: Means that regardless of the page, `MMM-page-indicator` will be shown.
 
 #### The second method for defining pages:
 ```js
