@@ -53,7 +53,7 @@ module.exports = NodeHelper.create({
 		})
 	},
 
-	putBackOldConfig: function(){
+	restoreOldConfig: function(){
 		const self = this;
 		return new Promise(resolve => {
 			fs.rename(self.tempConfigPath, self.configPath, () => {
@@ -100,9 +100,15 @@ module.exports = NodeHelper.create({
 					}
 					if(name !== undefined && page_module_names.includes(name)){
 						if(typeof module.position === "undefined"){
-							console.log(id,"has an undefined position, this will error",page[name]);
-							reRender = true;
-							module.position = page[name]
+							let newPos = page[name];
+							if(typeof newPos === "undefined" || newPos.toLowerCase() === "none" || newPos === false){
+								newPos = undefined
+							}
+							console.log(id,"has an undefined position, this will cause the page to reload and the position to be set to",newPos);
+							if(typeof newPos !== "undefined"){
+								reRender = true;
+								module.position = page[name];
+							}
 						}
 						page_store[id] = page[name]
 					}
@@ -117,13 +123,27 @@ module.exports = NodeHelper.create({
 				pageConfig[page_name.toLowerCase()] = pagePositions
 			})
 			if(config.hasOwnProperty("exclusions")){
-				const excluded_names = config.exclusions;
+				const excluded_names = Object.keys(config.exclusions);
 				modules.forEach((module, index) => {
 					const module_name = module.module;
 					const name = module.name;
 					const id = `module_${index}_${module_name}`;
 
 					if(excluded_names.includes(module_name) || excluded_names.includes(name)){
+						let selector = "";
+						if(excluded_names.includes(name)) selector = name
+						if(excluded_names.includes(module_name)) selector = module_name
+						if(typeof module.position === "undefined"){
+							let newPos = config.exclusions[selector];
+							if(typeof newPos === "undefined" || newPos.toLowerCase() === "none" || newPos === false){
+								newPos = undefined
+							}
+							console.log(id,"is excluded and has an undefined position, this will cause the page to reload and the position to be set to",newPos);
+							if(typeof newPos !== "undefined"){
+								reRender = true;
+								module.position = config.exclusions[selector];
+							}
+						}
 						exclusions.push(id)
 					}
 				})
@@ -135,13 +155,22 @@ module.exports = NodeHelper.create({
 			modules.forEach((module, index) => {
 				const name = module.module;
 				const pages = module.pages;
-				if(typeof module.position === "undefined"){
-					console.log(`module_${index}_${name}`,"has an undefined position, this will cause the page to reload",pages[0]);
-					reRender = true;
-					module.position = page[0]
-				}
 				if(typeof pages === "object"){
 					const modulePages = Object.keys(pages);
+					if(typeof module.position === "undefined"){
+						let newPos = pages[modulePages[0]];
+						if(typeof newPos === "undefined" || newPos.toLowerCase() === "none" || newPos === false){
+							newPos = undefined
+						}
+						console.log(`module_${index}_${name}`,"has an undefined position, this will cause the page to reload and the position to be set to",newPos);
+						if(typeof newPos !== "undefined"){
+							reRender = true;
+							module.position = pages[modulePages[0]]
+						}
+					}
+					if(modulePages.includes("all")){
+						exclusions.push(`module_${index}_${name}`);
+					}
 
 					modulePages.forEach(page => {
 						if(pageList.indexOf(page) === -1){
@@ -153,10 +182,8 @@ module.exports = NodeHelper.create({
 							"identifier": `module_${index}_${name}`
 						})
 					})
-				}else if(typeof pages === "string"){
-					if(pages.toLowerCase() === "all"){
-						exclusions.push(`module_${index}_${name}`);
-					}
+				}else{
+					console.log(name,"was given an invalid pages prop. You should probably fix that.")
 				}
 			});
 		}
@@ -165,7 +192,7 @@ module.exports = NodeHelper.create({
 			await self.writeNewConfig(config);
 			self.sendSocketNotification("RESTART_DOM");
 		}else if(fs.existsSync(self.tempConfigPath)){
-			self.putBackOldConfig();
+			self.restoreOldConfig();
 		}
 		self.sendSocketNotification("SET_PAGE_CONFIG", pageConfig);
 		self.sendSocketNotification("SET_EXCLUSIONS_CONFIG", exclusions);
