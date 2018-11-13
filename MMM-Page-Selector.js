@@ -114,7 +114,7 @@ Module.register("MMM-Page-Selector", {
 	setUpPage: function(pageName) {
 		const self = this;
 		var page = self.pages[pageName];
-		console.log(MM)
+
 		if(page !== undefined){
 			//Set title once the page has been identified
 			self.page = pageName;
@@ -218,6 +218,8 @@ Module.register("MMM-Page-Selector", {
 			self.init();
 		}else if(notification === 'PAGE_SELECT'){
 			self.changePage(payload);
+		}else if(notification === "RESTART_DOM"){
+			window.location.reload(false); 
 		}
 	},
 
