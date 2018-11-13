@@ -104,7 +104,6 @@ module.exports = NodeHelper.create({
 							if(typeof newPos === "undefined" || newPos.toLowerCase() === "none" || newPos === false){
 								newPos = undefined
 							}
-							console.log(id,"has an undefined position, this will cause the page to reload and the position to be set to",newPos);
 							if(typeof newPos !== "undefined"){
 								reRender = true;
 								module.position = page[name];
@@ -138,7 +137,6 @@ module.exports = NodeHelper.create({
 							if(typeof newPos === "undefined" || newPos.toLowerCase() === "none" || newPos === false){
 								newPos = undefined
 							}
-							console.log(id,"is excluded and has an undefined position, this will cause the page to reload and the position to be set to",newPos);
 							if(typeof newPos !== "undefined"){
 								reRender = true;
 								module.position = config.exclusions[selector];
@@ -162,7 +160,6 @@ module.exports = NodeHelper.create({
 						if(typeof newPos === "undefined" || newPos.toLowerCase() === "none" || newPos === false){
 							newPos = undefined
 						}
-						console.log(`module_${index}_${name}`,"has an undefined position, this will cause the page to reload and the position to be set to",newPos);
 						if(typeof newPos !== "undefined"){
 							reRender = true;
 							module.position = pages[modulePages[0]]
@@ -170,20 +167,18 @@ module.exports = NodeHelper.create({
 					}
 					if(modulePages.includes("all")){
 						exclusions.push(`module_${index}_${name}`);
-					}
-
-					modulePages.forEach(page => {
-						if(pageList.indexOf(page) === -1){
-							pageList.push(page);
-							pageConfig[page.toLowerCase()] = [];
-						}
-						pageConfig[page.toLowerCase()].push({
-							"position": pages[page],
-							"identifier": `module_${index}_${name}`
+					}else{
+						modulePages.forEach(page => {
+							if(pageList.indexOf(page) === -1){
+								pageList.push(page);
+								pageConfig[page.toLowerCase()] = [];
+							}
+							pageConfig[page.toLowerCase()].push({
+								"position": pages[page],
+								"identifier": `module_${index}_${name}`
+							})
 						})
-					})
-				}else{
-					console.log(name,"was given an invalid pages prop. You should probably fix that.")
+					}
 				}
 			});
 		}
