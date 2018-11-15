@@ -14,6 +14,9 @@ git clone https://github.com/Veldrovive/MMM-Page-Selector.git
 ```
 
 ## Usage
+For all usage, including the standard `position` prop in the module config is allowed, but is not necessary and does not have any effect.
+
+**Very Important Note**: MMM-Page-Selector **must** still have a position prop.
 #### There are two options for creating pages. If in doubt, use the first one:
 If there are too many pages and using the `page` prop becomes confusing. Switch to the second method. It is slightly more complicated to set up, but is more clear when many modules are at play.
 ```js
@@ -31,24 +34,23 @@ modules[
     //Example of the config for a module to be shown on pages: "pageNameOne" and "pageNameTwo"
     {
         module: "MMM-any-other",
-        position: "bottom_center", //Or any other position, this doesnt matter unless "pages" is set to "all"
-        pages: {"pageNameOne": "position", "pageNameTwo": "another_position"},
-        config: {}
+        //position: "bottom_center", It is NOT neccesary to have a position prop anymore although having one does not have any effect
+        pages: {"pageNameOne": "position_string", "pageNameTwo": "another_position_string"},
+        config: {...}
     },
   ...
     //Example of the config for a module to be shown on all pages
     {
         module: "MMM-any-other",
-        position: "bottom_center", //This value defines the position that the module will always appear in
-        pages: "all",
-        config: {}
+        pages: {"all": "position_string"},
+        config: {...}
     }
 ]
 ```
 Pages are created implicitly when included within a module's `pages` prop.<br/>
 For example, specifying `pages: {"main": "bottom_center", "fun": "top_right"}` will create the pages `main` and `fun` then make the module appear at the bottom center on the main page and top right on the fun page.
 
-If `pages` is set to "all", then the module will always appear in the position defined by the `position` prop.
+If `pages` is set to `{"all": "position_string"}`, then the module will always appear in the position defined by the position_string.
 
 Example of a complete config for a very simple mirror (Click [here](https://github.com/Veldrovive/MMM-Page-Selector/issues/3#issuecomment-433203300) for a more complicated example):
 ```js
@@ -69,13 +71,11 @@ modules: [
     },
     {
         module: "MMM-Weather-Now",
-        position: "bottom_center",
         pages: {main: "top_right", weather: "bottom_left"}
     },
     {
         module: "MMM-page-indicator",
-        position: "bottom_center",
-        pages: "all"
+        pages: {"all": "bottom_bar"}
     }
 ]
 ```
@@ -94,12 +94,10 @@ The configuration for `MMM-Page-Selector` will:
   * `interval`: Changes the page automatically every certain amount of time. In this case, the next page will be displayed every 100 seconds.
 
 The configuration for `MMM-Weather-Now` will:
-* `position`: This doesn't matter, it just has to be set so Magic Mirror will render the module.
 * `pages`: Each key defines a page and each value defines the position on that page. This means that `MMM-Weather-Now` will be rendered at the top right when on the "main" page and on the bottom left when on the "weather" page.
 
 The configuration for `MMM-page-indicator` will:
-* `position`: Since this will be on all pages, setting the position to be "bottom_center" means that it will always be displayed there.
-* `pages`: Means that reguardless of the page, `MMM-page-indicator` will be shown.
+* `pages`: Means that regardless of the page, `MMM-page-indicator` will be shown on the bottom bar.
 
 #### The second method for defining pages:
 ```js
@@ -162,9 +160,9 @@ pages: {
 	"transport_left": "bottom_left"
     }
 },
-exclusions: [
-    "MMM-page-indicator"
-]
+exclusions: {
+    "MMM-page-indicator": "bottom_bar"
+}
 ```
 Both `pages` and `exclusions` are on the same level as `modules`
 
@@ -178,9 +176,10 @@ Both `pages` and `exclusions` are on the same level as `modules`
     
 `exclusions`: 
 
-* This works the same as `pages: "all"` from the first method. The module is shown on all pages and the position is defined by the position prop. The only difference is that the selector can be the `module name` or the `name` prop.
+* This works the same as `pages: "all"` from the first method. The module is shown on all pages and the position is defined in the same way as it is in the pages config. The selector can be the `module name` or the `name` prop.
 
-Note: if 3rd party modules fail to hide correctly, a [potential fix](https://github.com/Veldrovive/MMM-Page-Selector/issues/2) is to remove the position prop.
+Note: Setting the position to `"none"` has the same effect as not defining a position for the module.
+
 ## Configuration
 Option|Description
 ------|-----------

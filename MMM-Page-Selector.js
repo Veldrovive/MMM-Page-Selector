@@ -78,6 +78,10 @@ Module.register("MMM-Page-Selector", {
 	},
 
 	getModuleRef: function(module){
+		ref = document.getElementById(module.data.identifier);
+		if(ref === null){
+			throw "Module was selected, but not found in the DOM. Make sure that a position for the module is set in the config.js!"
+		}
 		return document.getElementById(module.data.identifier);
 	},
 
@@ -87,25 +91,8 @@ Module.register("MMM-Page-Selector", {
 		    referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
 		}
 
-		//Defines where modules will be with a map between the position string and the css class
-		var locations = {
-			"top_bar": "region top bar",
-			"top_left": "region top left",
-			"top_center": "region top center",
-			"top_right": "region top right",
-			"upper_third": "region upper third",
-			"middle_center": "region middle center",
-			"lower_third": "region lower third",
-			"bottom_left": "region bottom left",
-			"bottom_center": "region bottom center",
-			"bottom_right": "region bottom right",
-			"bottom_bar": "region bottom bar",
-			"fullscreen_above": "region fullscreen above",
-			"fullscreen_below": "region fullscreen below",
-		}
-
 		//Search for the correct container to append the module into
-		var moveToRef = document.getElementsByClassName(locations[loc])[0];
+		var moveToRef = document.getElementsByClassName(loc.replace("_", " "))[0];
 		if(typeof moveToRef === "undefined"){
 			Log.error("Incorrect Position string for module:", ref);
 			return false;
@@ -127,6 +114,7 @@ Module.register("MMM-Page-Selector", {
 	setUpPage: function(pageName) {
 		const self = this;
 		var page = self.pages[pageName];
+
 		if(page !== undefined){
 			//Set title once the page has been identified
 			self.page = pageName;
@@ -230,6 +218,8 @@ Module.register("MMM-Page-Selector", {
 			self.init();
 		}else if(notification === 'PAGE_SELECT'){
 			self.changePage(payload);
+		}else if(notification === "RESTART_DOM"){
+			window.location.reload(false); 
 		}
 	},
 
