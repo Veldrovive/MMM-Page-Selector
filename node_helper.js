@@ -7,6 +7,7 @@ module.exports = NodeHelper.create({
 		this.createRoutes(this);
 		this.configPath = path.join(__dirname, "../..", "config/config.js");
 		this.tempConfigPath = path.join(__dirname, "../..", "config/config.page_selector_temp.js");
+		this.tempPath = path.join(__dirname, "temp.json")
 	},
 
 	//Page can also be changed externally by calling to the /selectPage endpoint
@@ -23,6 +24,62 @@ module.exports = NodeHelper.create({
 		const self = this;
 		if(notification === "UPDATE_PAGES"){
 			self.getModulePages();
+		}else if(notification === "WRITE_TEMP"){
+			self.writeTemp(payload);
+		}else if(notification === "RESTORE_PAGE"){
+			self.restorePage()
+		}
+	},
+
+	getTempObject: function(){
+		try{
+			var obj = fs.readFileSync(this.tempPath);
+			jsonObj = JSON.parse(obj);
+			return jsonObj;
+		}catch(err){
+			return {};
+		}
+	},
+
+	writeTemp: function(updateVals){
+		//updateVals is an object that gets written into the temp file
+		const self = this;
+		temp = self.getTempObject();
+		keys = Object.keys(updateVals);
+		keys.forEach(key => {
+			temp[key] = updateVals[key];
+		})
+		return new Promise((resolve, reject) => {
+			fs.writeFile(self.tempPath, JSON.stringify(temp), function(err) {
+			    if(err) {
+			        reject(err);
+			    }
+
+			    resolve();
+			}); 
+		})
+	},
+
+	getTemp: function(keys){
+		//keys defines the info that will be returned from the temp object
+		const self = this;
+		res_temp = {};
+		temp = self.getTempObject();
+		keys.forEach(key => {
+			if(temp.hasOwnProperty(key)){
+				res_temp[key] = temp[key]
+			}
+		})
+		return res_temp
+	},
+
+	restorePage: function(){
+		const self = this;
+		temp = self.getTemp(["page"]);
+		if(temp.hasOwnProperty("page")){
+			self.sendSocketNotification("PAGE_SELECT", temp["page"]);
+		}else{
+			self.sendSocketNotification("PAGE_SELECT", 0)
 		}
 	},
 

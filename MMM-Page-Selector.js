@@ -73,7 +73,11 @@ Module.register("MMM-Page-Selector", {
 			if(pages.indexOf(self.page) === -1){
 				self.page = pages[0];
 			}
-			self.changePage(self.page);
+			if(self.config.persistentPages){
+				self.sendSocketNotification("RESTORE_PAGE")
+			}else{
+				self.changePage(self.page);
+			}
 		}
 	},
 
@@ -123,6 +127,7 @@ Module.register("MMM-Page-Selector", {
 			//Integration with MMM-page-indicator
 			const indexOfPage = Object.keys(self.pages).indexOf(pageName);
 			self.sendNotification("PAGE_CHANGED", indexOfPage);
+			self.sendSocketNotification("WRITE_TEMP", {page: pageName})
 
 			//Code for moving and changing visibility for certain modules
 			MM.getModules()
