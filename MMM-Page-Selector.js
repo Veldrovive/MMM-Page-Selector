@@ -76,7 +76,7 @@ Module.register("MMM-Page-Selector", {
 			if(self.config.persistentPages){
 				self.sendSocketNotification("RESTORE_PAGE")
 			}else{
-				self.changePage(self.page);
+				self.changePage(self.config.defaultPage);
 			}
 		}
 	},
@@ -151,7 +151,8 @@ Module.register("MMM-Page-Selector", {
 				}), 500
 			)
 		}else{
-			Log.error("Tried to navigate to a non-existent page: ",pageName);
+			Log.error("Tried to navigate to a non-existent page: ",pageName,", navigating to default");
+			self.setUpPage(self.config.defaultPage.toLowerCase())
 		}
 	},
 
