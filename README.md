@@ -64,6 +64,7 @@ modules: [
             selectPageNotif: ["SELECT_PAGE"],
             incrementPageNotif: ["PAGE_UP"],
             decrementPageNotif: ["PAGE_DOWN"],
+	    persistentPages: true,
 	    autoChange: {
 	    	interval: 100
 	    }
@@ -89,6 +90,8 @@ The configuration for `MMM-Page-Selector` will:
 * `incrementPageNotif`: Sending a notification to "PAGE_UP" will now increment the page. By default, this already includes "INCREMENT_PAGE".
 
 * `decrementPageNotif`: Sending a notification to "PAGE_DOWN" will now decrement the page. By default, this already includes "DECREMENT_PAGE".
+
+* `persistentPages`: If set to true, the current page you are on will persist even through restarts.
 
 * `autoChange`: Used for automatically changing the page.
   * `interval`: Changes the page automatically every certain amount of time. In this case, the next page will be displayed every 100 seconds.
