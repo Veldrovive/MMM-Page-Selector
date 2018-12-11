@@ -226,7 +226,7 @@ module.exports = NodeHelper.create({
 						exclusions.push(`module_${index}_${name}`);
 					}else{
 						modulePages.forEach(page => {
-							if(pageList.indexOf(page) === -1){
+							if(pageList.indexOf(page.toLowerCase()) === -1){
 								pageList.push(page);
 								pageConfig[page.toLowerCase()] = [];
 							}

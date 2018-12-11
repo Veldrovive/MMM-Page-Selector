@@ -76,7 +76,8 @@ Module.register("MMM-Page-Selector", {
 			if(self.config.persistentPages){
 				self.sendSocketNotification("RESTORE_PAGE")
 			}else{
-				self.changePage(self.config.defaultPage);
+				defaultPage = typeof self.config.defaultPage === "undefined" ? 0 : self.config.defaultPage;
+				self.changePage(defaultPage);
 			}
 		}
 	},
@@ -101,13 +102,8 @@ Module.register("MMM-Page-Selector", {
 			Log.error("Incorrect Position string for module:", ref);
 			return false;
 		}
-		var containers = moveToRef.childNodes;
-		var container;
-		containers.forEach(node => {
-			if (node.className == "container") {
-				container = node;
-			}
-		})
+		var containers = Array.from(moveToRef.childNodes);
+		var container = containers.filter(node => node.className == "container")[0]
 		if(loc === "top_bar"){
 			insertAfter(ref, self.getModuleRef(self))
 		}else{
@@ -152,7 +148,12 @@ Module.register("MMM-Page-Selector", {
 			)
 		}else{
 			Log.error("Tried to navigate to a non-existent page: ",pageName,", navigating to default");
-			self.setUpPage(self.config.defaultPage.toLowerCase())
+			if(pageName === self.config.defaultPage.toLowerCase()){
+				Log.error("Default page does not exist, defaulting to page zero")
+				self.changePage(0)
+			}else{
+				self.changePage(self.config.defaultPage.toLowerCase())
+			}
 		}
 	},
 
