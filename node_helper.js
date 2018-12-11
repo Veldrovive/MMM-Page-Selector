@@ -227,7 +227,7 @@ module.exports = NodeHelper.create({
 					}else{
 						modulePages.forEach(page => {
 							if(pageList.indexOf(page.toLowerCase()) === -1){
-								pageList.push(page);
+								pageList.push(page.toLowerCase());
 								pageConfig[page.toLowerCase()] = [];
 							}
 							pageConfig[page.toLowerCase()].push({
