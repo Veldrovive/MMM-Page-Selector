@@ -85,7 +85,8 @@ Module.register("MMM-Page-Selector", {
 	getModuleRef: function(module){
 		ref = document.getElementById(module.data.identifier);
 		if(ref === null){
-			throw "Module was selected, but not found in the DOM. Make sure that a position for the module is set in the config.js!"
+			Log.log("Module was selected, but not found in the DOM. Make sure that a position for the module is set in the config.js!")
+			return document.createElement("div")
 		}
 		return document.getElementById(module.data.identifier);
 	},
@@ -111,6 +112,31 @@ Module.register("MMM-Page-Selector", {
 		}
 	},
 
+	removeClasses: function(ref, classes){
+		const self = this;
+
+		if(typeof classes === "undefined"){
+			classes = Object.keys(self.pages).map(x => `page_${x.replace(" ", "_")}`)
+		}
+		classes.forEach(page => {
+			if(ref.classList.contains(page)){
+				ref.classList.remove(page)
+			}
+		})
+	},
+
+	changeClassToPage: function(ref, pageName){
+		const self = this;
+		pageName = `page_${pageName.replace(" ", "_")}`
+
+		const allPages = Object.keys(self.pages).map(x => `page_${x.replace(" ", "_")}`)
+		if(!allPages.includes(pageName)){
+			Log.log(`Page class does not match page list. This means that the class, ${pageName}, will never be removed.`)
+		}
+		self.removeClasses(ref, allPages)
+		ref.classList.add(pageName)
+	},
+
 	setUpPage: function(pageName) {
 		const self = this;
 		var page = self.pages[pageName];
@@ -130,6 +156,7 @@ Module.register("MMM-Page-Selector", {
 				.enumerate(module => {
 					if(!self.neverHide.includes(module.data.identifier)){
 						module.hide(500, { lockString: self.identifier });
+						self.removeClasses(self.getModuleRef(module))
 					}
 				})
 
@@ -143,6 +170,7 @@ Module.register("MMM-Page-Selector", {
 						const id = module.data.identifier;
 						self.moveRefToLoc(self.getModuleRef(module), page[identifiers.indexOf(id)].position);
 						module.show(500, { lockString: self.identifier });
+						self.changeClassToPage(self.getModuleRef(module), pageName)
 					}
 				}), 500
 			)
