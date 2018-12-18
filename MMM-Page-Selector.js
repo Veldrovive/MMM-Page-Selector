@@ -3,6 +3,7 @@ Module.register("MMM-Page-Selector", {
 	defaults: {
 		page: "",
 		displayTitle: true,
+		debug: false,
 
 		selectPageNotif: [],
 		incrementPageNotif: [],
@@ -29,6 +30,14 @@ Module.register("MMM-Page-Selector", {
 			}
 		}
 	},
+
+	debug: function(message){
+		const self = this;
+
+		if(self.config.debug){
+			Log.log(message)
+		}
+	}
 
 	startChangeInterval: function(interval){
 		const self = this;
@@ -85,7 +94,7 @@ Module.register("MMM-Page-Selector", {
 	getModuleRef: function(module){
 		ref = document.getElementById(module.data.identifier);
 		if(ref === null){
-			Log.log("Module was selected, but not found in the DOM. Make sure that a position for the module is set in the config.js!")
+			self.debug("Module was selected, but not found in the DOM. Make sure that a position for the module is set in the config.js!")
 			return document.createElement("div")
 		}
 		return document.getElementById(module.data.identifier);
@@ -131,7 +140,7 @@ Module.register("MMM-Page-Selector", {
 
 		const allPages = Object.keys(self.pages).map(x => `page_${x.replace(" ", "_")}`)
 		if(!allPages.includes(pageName)){
-			Log.log(`Page class does not match page list. This means that the class, ${pageName}, will never be removed.`)
+			self.debug(`Page class does not match page list. This means that the class, ${pageName}, will never be removed.`)
 		}
 		self.removeClasses(ref, allPages)
 		ref.classList.add(pageName)
