@@ -142,7 +142,6 @@ module.exports = NodeHelper.create({
 				const page_module_names = Object.keys(page);
 				const page_store = {};
 				pageConfig[page_name.toLowerCase()] = Array(page_module_names.length);
-				console.log("\n",page_name);
 
 				modules.forEach((module, index) => {
 					const module_name = module.module;
@@ -153,7 +152,6 @@ module.exports = NodeHelper.create({
 							reRender = true;
 							module.position = page[module_name]
 						}
-						console.log("Getting index from module name:",module_name);
 						page_store[id] = {position: page[module_name], index: page_module_names.indexOf(module_name)};
 					}
 					if(name !== undefined && page_module_names.includes(name)){
@@ -167,7 +165,6 @@ module.exports = NodeHelper.create({
 								module.position = page[name];
 							}
 						}
-						console.log("Getting index from given name:",name);
 						page_store[id] = {position: page[name], index: page_module_names.indexOf(name)};
 					}
 				})
