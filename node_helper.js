@@ -138,11 +138,11 @@ module.exports = NodeHelper.create({
 			const pageNames = Object.keys(pages);
 
 			pageNames.forEach(page_name => {
-				const used_ids = [];
-				pageConfig[page_name.toLowerCase()] = [];
 				const page = pages[page_name];
 				const page_module_names = Object.keys(page);
 				const page_store = {};
+				pageConfig[page_name.toLowerCase()] = Array(page_module_names.length);
+				console.log("\n",page_name);
 
 				modules.forEach((module, index) => {
 					const module_name = module.module;
@@ -153,7 +153,8 @@ module.exports = NodeHelper.create({
 							reRender = true;
 							module.position = page[module_name]
 						}
-						page_store[id] = page[module_name]
+						console.log("Getting index from module name:",module_name);
+						page_store[id] = {position: page[module_name], index: page_module_names.indexOf(module_name)};
 					}
 					if(name !== undefined && page_module_names.includes(name)){
 						if(typeof module.position === "undefined"){
@@ -166,15 +167,24 @@ module.exports = NodeHelper.create({
 								module.position = page[name];
 							}
 						}
-						page_store[id] = page[name]
+						console.log("Getting index from given name:",name);
+						page_store[id] = {position: page[name], index: page_module_names.indexOf(name)};
 					}
 				})
 				pagePositions = []
 				Object.keys(page_store).forEach(id => {
-					pagePositions.push({
-						"position": page_store[id],
+					let count = 0;
+					while(typeof pagePositions[page_store[id].index] !== "undefined"){
+						if(count > 1000){
+							throw "Breaking out of loop. If you had this many modules with the same name you messed up anyways."
+						}
+						count++;
+						page_store[id].index++;
+					}
+					pagePositions[page_store[id].index] = {
+						"position": page_store[id].position,
 						"identifier": id
-					})
+					}
 				})
 				pageConfig[page_name.toLowerCase()] = pagePositions
 			})
@@ -199,7 +209,10 @@ module.exports = NodeHelper.create({
 								module.position = config.exclusions[selector];
 							}
 						}
-						exclusions.push(id)
+						exclusions.push({
+							"identifier": id,
+							"position": config.exclusions[selector],
+						})
 					}
 				})
 			}
@@ -223,7 +236,10 @@ module.exports = NodeHelper.create({
 						}
 					}
 					if(modulePages.includes("all")){
-						exclusions.push(`module_${index}_${name}`);
+						exclusions.push({
+							"identifier": `module_${index}_${name}`,
+							"position": pages["all"] || pages["All"],
+						});
 					}else{
 						modulePages.forEach(page => {
 							if(pageList.indexOf(page.toLowerCase()) === -1){

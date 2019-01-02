@@ -92,12 +92,17 @@ Module.register("MMM-Page-Selector", {
 	},
 
 	getModuleRef: function(module){
-		ref = document.getElementById(module.data.identifier);
+		if(typeof module.data === "undefined"){
+			ref = document.getElementById(module.identifier);
+		}else{
+			ref = document.getElementById(module.data.identifier);
+		}
+
 		if(ref === null){
 			this.debug("Module was selected, but not found in the DOM. Make sure that a position for the module is set in the config.js!")
 			return document.createElement("div")
 		}
-		return document.getElementById(module.data.identifier);
+		return ref;
 	},
 
 	moveRefToLoc: function(ref, loc){
@@ -117,7 +122,7 @@ Module.register("MMM-Page-Selector", {
 		if(loc === "top_bar"){
 			insertAfter(ref, self.getModuleRef(self))
 		}else{
-			container.prepend(ref);
+			container.append(ref);
 		}
 	},
 
@@ -140,7 +145,7 @@ Module.register("MMM-Page-Selector", {
 
 		const allPages = Object.keys(self.pages).map(x => `page_${x.replace(" ", "_")}`)
 		if(!allPages.includes(pageName)){
-			self.debug(`Page class does not match page list. This means that the class, ${pageName}, will never be removed.`)
+			self.debug(`Page class does not match page list. This means that the class, ${pageName}, will never be removed.`);
 		}
 		self.removeClasses(ref, allPages)
 		ref.classList.add(pageName)
@@ -161,28 +166,22 @@ Module.register("MMM-Page-Selector", {
 			self.sendSocketNotification("WRITE_TEMP", {page: pageName})
 
 			//Code for moving and changing visibility for certain modules
+			const neverHideIds = self.neverHide.map(x => x.identifier);
 			MM.getModules()
 				.enumerate(module => {
-					if(!self.neverHide.includes(module.data.identifier)){
+					if(!neverHideIds.includes(module.data.identifier)){
 						module.hide(500, { lockString: self.identifier });
 						self.removeClasses(self.getModuleRef(module))
 					}
 				})
 
 			const identifiers = page.map(x => x.identifier);
-			setTimeout(() => MM.getModules()
-				.enumerate(module => {
-					if(self.neverHide.includes(module.data.identifier)){
-						module.show(0, { lockString: self.identifier })
-					}
-					if(identifiers.includes(module.data.identifier)){
-						const id = module.data.identifier;
-						self.moveRefToLoc(self.getModuleRef(module), page[identifiers.indexOf(id)].position);
-						module.show(500, { lockString: self.identifier });
-						self.changeClassToPage(self.getModuleRef(module), pageName)
-					}
-				}), 500
-			)
+			setTimeout(() => {
+				page.forEach((module) => {
+					self.moveRefToLoc(module.ref, module.position);
+					module.mmModule.show(500, { lockString: self.identifier });
+				})
+			}, 500)
 		}else{
 			Log.error("Tried to navigate to a non-existent page: ",pageName,", navigating to default");
 			if(pageName === self.config.defaultPage.toLowerCase()){
@@ -198,6 +197,7 @@ Module.register("MMM-Page-Selector", {
 	//will be incremented by that number. Otherwise it will simply select the page at that index
 	changePage: function(page, increment){
 		const self = this;
+		// Using a custom mod function so that negative numbers work as well
 		function mod(n, m) {
 		  return ((n % m) + m) % m;
 		}
@@ -247,6 +247,48 @@ Module.register("MMM-Page-Selector", {
 		}
 	},
 
+	addPageReferences: function(){
+		const self = this;
+		const pages = Object.keys(self.pages);
+		const idModuleMap = {}
+		MM.getModules().enumerate((module) => {
+			idModuleMap[module.data.identifier] = module
+		});
+
+		pages.forEach((page) => {
+			_page = self.pages[page];
+			_page.forEach((module) => {
+				module.mmModule = idModuleMap[module.identifier];
+				module.ref = self.getModuleRef(module.mmModule);
+			})
+		});
+	},
+
+	addExclusionReferences: function(){
+		const self = this;
+		const idModuleMap = {}
+		MM.getModules().enumerate((module) => {
+			idModuleMap[module.data.identifier] = module
+		});
+
+		self.neverHide.forEach((module) => {
+			module.mmModule = idModuleMap[module.identifier];
+			module.ref = self.getModuleRef(module.mmModule);
+		});
+	},
+
+	positionExclusions: function(){
+		const self = this;
+		self.neverHide.forEach((module) => {
+			if(module.position.toLowerCase() === "none"){
+				module.mmModule.hide(0, { lockString: self.identifier });
+			}else{
+				module.mmModule.show(500, { lockString: self.identifier });
+				self.moveRefToLoc(module.ref, module.position);
+			}
+		})
+	},
+
 	//When the helper sends the PAGE_SELECT notification, start setting up the page cooresponding to the payload
 	socketNotificationReceived: function(notification, payload){
 		const self = this;
@@ -254,11 +296,14 @@ Module.register("MMM-Page-Selector", {
 		if(notification === "SET_PAGE_CONFIG"){
 			self.pages = payload;
 			self.pagesLoaded = true;
+			self.addPageReferences();
 			self.init();
 		}else if (notification === "SET_EXCLUSIONS_CONFIG"){
 			self.neverHide = payload;
-			self.neverHide.push(self.identifier)
+			self.neverHide.push({"identifier": self.identifier, "position": self.data.position });
 			self.exclusionsLoaded = true;
+			self.addExclusionReferences();
+			self.positionExclusions();
 			self.init();
 		}else if(notification === 'PAGE_SELECT'){
 			self.changePage(payload);
