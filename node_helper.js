@@ -7,6 +7,7 @@ module.exports = NodeHelper.create({
 		this.createRoutes(this);
 		this.configPath = path.join(__dirname, "../..", "config/config.js");
 		this.tempConfigPath = path.join(__dirname, "../..", "config/config.page_selector_temp.js");
+		this.tempPath = path.join(__dirname, "temp.json")
 	},
 
 	//Page can also be changed externally by calling to the /selectPage endpoint
@@ -23,6 +24,62 @@ module.exports = NodeHelper.create({
 		const self = this;
 		if(notification === "UPDATE_PAGES"){
 			self.getModulePages();
+		}else if(notification === "WRITE_TEMP"){
+			self.writeTemp(payload);
+		}else if(notification === "RESTORE_PAGE"){
+			self.restorePage()
+		}
+	},
+
+	getTempObject: function(){
+		try{
+			var obj = fs.readFileSync(this.tempPath);
+			jsonObj = JSON.parse(obj);
+			return jsonObj;
+		}catch(err){
+			return {};
+		}
+	},
+
+	writeTemp: function(updateVals){
+		//updateVals is an object that gets written into the temp file
+		const self = this;
+		temp = self.getTempObject();
+		keys = Object.keys(updateVals);
+		keys.forEach(key => {
+			temp[key] = updateVals[key];
+		})
+		return new Promise((resolve, reject) => {
+			fs.writeFile(self.tempPath, JSON.stringify(temp), function(err) {
+			    if(err) {
+			        reject(err);
+			    }
+
+			    resolve();
+			}); 
+		})
+	},
+
+	getTemp: function(keys){
+		//keys defines the info that will be returned from the temp object
+		const self = this;
+		res_temp = {};
+		temp = self.getTempObject();
+		keys.forEach(key => {
+			if(temp.hasOwnProperty(key)){
+				res_temp[key] = temp[key]
+			}
+		})
+		return res_temp
+	},
+
+	restorePage: function(){
+		const self = this;
+		temp = self.getTemp(["page"]);
+		if(temp.hasOwnProperty("page")){
+			self.sendSocketNotification("PAGE_SELECT", temp["page"]);
+		}else{
+			self.sendSocketNotification("PAGE_SELECT", 0)
 		}
 	},
 
@@ -81,11 +138,10 @@ module.exports = NodeHelper.create({
 			const pageNames = Object.keys(pages);
 
 			pageNames.forEach(page_name => {
-				const used_ids = [];
-				pageConfig[page_name.toLowerCase()] = [];
 				const page = pages[page_name];
 				const page_module_names = Object.keys(page);
 				const page_store = {};
+				pageConfig[page_name.toLowerCase()] = Array(page_module_names.length);
 
 				modules.forEach((module, index) => {
 					const module_name = module.module;
@@ -96,7 +152,7 @@ module.exports = NodeHelper.create({
 							reRender = true;
 							module.position = page[module_name]
 						}
-						page_store[id] = page[module_name]
+						page_store[id] = {position: page[module_name], index: page_module_names.indexOf(module_name)};
 					}
 					if(name !== undefined && page_module_names.includes(name)){
 						if(typeof module.position === "undefined"){
@@ -109,15 +165,23 @@ module.exports = NodeHelper.create({
 								module.position = page[name];
 							}
 						}
-						page_store[id] = page[name]
+						page_store[id] = {position: page[name], index: page_module_names.indexOf(name)};
 					}
 				})
 				pagePositions = []
 				Object.keys(page_store).forEach(id => {
-					pagePositions.push({
-						"position": page_store[id],
+					let count = 0;
+					while(typeof pagePositions[page_store[id].index] !== "undefined"){
+						if(count > 1000){
+							throw "Breaking out of loop. If you had this many modules with the same name you messed up anyways."
+						}
+						count++;
+						page_store[id].index++;
+					}
+					pagePositions[page_store[id].index] = {
+						"position": page_store[id].position,
 						"identifier": id
-					})
+					}
 				})
 				pageConfig[page_name.toLowerCase()] = pagePositions
 			})
@@ -142,7 +206,10 @@ module.exports = NodeHelper.create({
 								module.position = config.exclusions[selector];
 							}
 						}
-						exclusions.push(id)
+						exclusions.push({
+							"identifier": id,
+							"position": config.exclusions[selector],
+						})
 					}
 				})
 			}
@@ -166,11 +233,14 @@ module.exports = NodeHelper.create({
 						}
 					}
 					if(modulePages.includes("all")){
-						exclusions.push(`module_${index}_${name}`);
+						exclusions.push({
+							"identifier": `module_${index}_${name}`,
+							"position": pages["all"] || pages["All"],
+						});
 					}else{
 						modulePages.forEach(page => {
-							if(pageList.indexOf(page) === -1){
-								pageList.push(page);
+							if(pageList.indexOf(page.toLowerCase()) === -1){
+								pageList.push(page.toLowerCase());
 								pageConfig[page.toLowerCase()] = [];
 							}
 							pageConfig[page.toLowerCase()].push({
