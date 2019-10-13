@@ -4,6 +4,7 @@ Module.register("MMM-Page-Selector", {
 		page: "",
 		displayTitle: true,
 		debug: false,
+		restoreDefault: -1,
 
 		selectPageNotif: [],
 		incrementPageNotif: [],
@@ -233,6 +234,12 @@ Module.register("MMM-Page-Selector", {
 
 		if(self.selectPageNotif.includes(notification)){
 			selectPage(payload);
+			clearTimeout(self.default_timeout);
+			if(![Object.keys(self.pages).indexOf(self.config.defaultPage), self.config.defaultPage].includes(payload) && self.config.restoreDefault > 0){
+			    self.default_timeout = setTimeout(() => {
+			        selectPage(self.config.defaultPage);
+			    }, self.config.restoreDefault*1000)
+			}
 		}else if(self.incrementPageNotif.includes(notification)){
 			self.changePage(1, true)
 		}else if(self.decrementPageNotif.includes(notification)){
