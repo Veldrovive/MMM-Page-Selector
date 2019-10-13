@@ -16,6 +16,8 @@ git clone https://github.com/Veldrovive/MMM-Page-Selector.git
 ## Usage
 For all usage, including the standard `position` prop in the module config is allowed, but is not necessary and does not have any effect.
 
+**Important Note**: If a position prop is not defined for any module, MMM-Page-Selector will create a temp config in order to get around any problems. This means that functions will not work in the config.js. If you are running into problems with this, define position props for all modules and then MMM-Page-Selector will not override the config.
+
 **Very Important Note**: MMM-Page-Selector **must** still have a position prop.
 #### There are two options for creating pages. If in doubt, use the first one:
 If there are too many pages and using the `page` prop becomes confusing. Switch to the second method. It is slightly more complicated to set up, but is more clear when many modules are at play.
