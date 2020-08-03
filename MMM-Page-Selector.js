@@ -93,6 +93,10 @@ Module.register("MMM-Page-Selector", {
 	},
 
 	getModuleRef: function(module){
+		if (module === undefined) {
+			Log.error("Failed to find a module in the DOM. This probably means you specified a module in your config that you do not have in your modules folder.");
+			return document.createElement("div");
+		}
 		if(typeof module.data === "undefined"){
 			ref = document.getElementById(module.identifier);
 		}else{
@@ -120,7 +124,7 @@ Module.register("MMM-Page-Selector", {
 		}
 		var containers = Array.from(moveToRef.childNodes);
 		var container = containers.filter(node => node.className == "container")[0]
-		if(loc === "top_bar"){
+		if(loc === self.data.position){
 			insertAfter(ref, self.getModuleRef(self))
 		}else{
 			container.append(ref);
@@ -180,8 +184,13 @@ Module.register("MMM-Page-Selector", {
 			setTimeout(() => {
 				page.forEach((module) => {
 					self.moveRefToLoc(module.ref, module.position);
-					module.mmModule.show(500, { lockString: self.identifier });
-				})
+					if (module.mmModule !== undefined) {
+						module.mmModule.show(500, { lockString: self.identifier });
+					} else {
+						Log.error(`Tried to show ${module.identifier} but the module is undefined. Check to make sure this module is installed correctly.`);
+					}
+				});
+				self.positionExclusions();
 			}, 500)
 		}else{
 			Log.error("Tried to navigate to a non-existent page: ",pageName,", navigating to default");
@@ -266,6 +275,9 @@ Module.register("MMM-Page-Selector", {
 			_page = self.pages[page];
 			_page.forEach((module) => {
 				module.mmModule = idModuleMap[module.identifier];
+				if (module.mmModule === undefined) {
+					Log.error(`${module.identifier} is not loaded correctly. Check that the name is spelled correctly and that you followed the installation instructions.`)
+				}
 				module.ref = self.getModuleRef(module.mmModule);
 			})
 		});
@@ -280,6 +292,9 @@ Module.register("MMM-Page-Selector", {
 
 		self.neverHide.forEach((module) => {
 			module.mmModule = idModuleMap[module.identifier];
+			if (module.mmModule === undefined) {
+				Log.error(`${module.identifier} is not loaded correctly. Check that the name is spelled correctly and that you followed the installation instructions.`)
+			}
 			module.ref = self.getModuleRef(module.mmModule);
 		});
 	},
@@ -288,9 +303,17 @@ Module.register("MMM-Page-Selector", {
 		const self = this;
 		self.neverHide.forEach((module) => {
 			if(module.position.toLowerCase() === "none"){
-				module.mmModule.hide(0, { lockString: self.identifier });
+				if (module.mmModule !== undefined) {
+					module.mmModule.hide(0, { lockString: self.identifier });
+				} else {
+					Log.error(`Tried to hide ${module.identifier} but the module is undefined. Check to make sure this module is installed correctly.`);
+				}
 			}else{
-				module.mmModule.show(500, { lockString: self.identifier });
+				if (module.mmModule !== undefined) {
+					module.mmModule.show(500, { lockString: self.identifier });
+				} else {
+					Log.error(`Tried to show ${module.identifier} but the module is undefined. Check to make sure this module is installed correctly.`);
+				}
 				self.moveRefToLoc(module.ref, module.position);
 			}
 		})
