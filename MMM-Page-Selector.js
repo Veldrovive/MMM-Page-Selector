@@ -168,6 +168,7 @@ Module.register("MMM-Page-Selector", {
 			//Integration with MMM-page-indicator
 			const indexOfPage = Object.keys(self.pages).indexOf(pageName);
 			self.sendNotification("PAGE_CHANGED", indexOfPage);
+			self.sendNotification("PAGE_UPDATE", {index: indexOfPage, name: pageName});
 			self.sendSocketNotification("WRITE_TEMP", {page: pageName})
 
 			//Code for moving and changing visibility for certain modules
