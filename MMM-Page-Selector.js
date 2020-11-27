@@ -326,6 +326,9 @@ Module.register("MMM-Page-Selector", {
 
 		if(notification === "SET_PAGE_CONFIG"){
 			self.pages = payload;
+			if (!(self.page in self.pages)) {
+				self.pages[self.page] = []
+			}
 			self.pagesLoaded = true;
 			self.addPageReferences();
 			self.init();
