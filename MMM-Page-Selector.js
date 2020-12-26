@@ -159,7 +159,7 @@ Module.register("MMM-Page-Selector", {
 	setUpPage: function(pageName) {
 		const self = this;
 		var page = self.pages[pageName];
-		self.debug("Switching to page:", pageName)
+		self.debug("Switching to page:", pageName, page)
 
 		if(page !== undefined){
 			//Set title once the page has been identified
@@ -189,6 +189,7 @@ Module.register("MMM-Page-Selector", {
 				page.forEach((module) => {
 					self.moveRefToLoc(module.ref, module.position);
 					if (module.mmModule !== undefined) {
+						self.debug("Trying to show module:", module)
 						module.mmModule.show(500, (out) => {
 							self.debug("Showing module:", module, "... Got back", out)
 						}, { lockString: self.identifier });
