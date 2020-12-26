@@ -32,11 +32,11 @@ Module.register("MMM-Page-Selector", {
 		}
 	},
 
-	debug: function(message){
+	debug: function(...message){
 		const self = this;
 
 		if(self.config.debug){
-			Log.log(message)
+			Log.log(...message)
 		}
 	},
 
@@ -104,7 +104,7 @@ Module.register("MMM-Page-Selector", {
 		}
 
 		if(ref === null){
-			this.debug("Module was selected, but not found in the DOM. Make sure that a position for the module is set in the config.js!")
+			this.debug(`Module ${module.identifier} was selected, but not found in the DOM. Make sure that a position for the module is set in the config.js!`)
 			return document.createElement("div")
 		}
 		return ref;
@@ -176,7 +176,9 @@ Module.register("MMM-Page-Selector", {
 			MM.getModules()
 				.enumerate(module => {
 					if(!neverHideIds.includes(module.data.identifier)){
-						module.hide(500, { lockString: self.identifier });
+						module.hide(500, (out) => {
+							self.debug("Hiding module:", module, "... Got back", out)
+						}, { lockString: self.identifier });
 						self.removeClasses(self.getModuleRef(module))
 					}
 				})
@@ -186,7 +188,9 @@ Module.register("MMM-Page-Selector", {
 				page.forEach((module) => {
 					self.moveRefToLoc(module.ref, module.position);
 					if (module.mmModule !== undefined) {
-						module.mmModule.show(500, { lockString: self.identifier });
+						module.mmModule.show(500, (out) => {
+							self.debug("Showing module:", module, "... Got back", out)
+						}, { lockString: self.identifier });
 					} else {
 						Log.error(`Tried to show ${module.identifier} but the module is undefined. Check to make sure this module is installed correctly.`);
 					}
@@ -201,6 +205,15 @@ Module.register("MMM-Page-Selector", {
 			}else{
 				self.changePage(self.config.defaultPage.toLowerCase())
 			}
+		}
+
+		if (this.config.debug) {
+			setTimeout(() => {
+				console.log("Module config after page switch")
+				MM.getModules().enumerate(module => {
+					console.log(module)
+				})
+			}, 1000)
 		}
 	},
 
