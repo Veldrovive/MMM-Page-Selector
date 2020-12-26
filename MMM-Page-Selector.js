@@ -23,6 +23,8 @@ Module.register("MMM-Page-Selector", {
 		this.incrementPageNotif = ["INCREMENT_PAGE"].concat(this.config.incrementPageNotif);
 		this.decrementPageNotif = ["DECREMENT_PAGE"].concat(this.config.decrementPageNotif);
 
+		this.showTimouts = []
+
 		if(this.config.hasOwnProperty("autoChange")){
 			autoChange = this.config.autoChange;
 			const methods = Object.keys(autoChange)
@@ -161,6 +163,11 @@ Module.register("MMM-Page-Selector", {
 		var page = self.pages[pageName];
 		self.debug("Switching to page:", pageName, page)
 
+		for (const timeout of self.showTimouts) {
+			clearTimeout(timeout)
+		}
+		self.showTimouts = []
+
 		if(page !== undefined){
 			//Set title once the page has been identified
 			self.page = pageName;
@@ -185,7 +192,7 @@ Module.register("MMM-Page-Selector", {
 				})
 
 			const identifiers = page.map(x => x.identifier);
-			setTimeout(() => {
+			const timeout = setTimeout(() => {
 				page.forEach((module) => {
 					self.moveRefToLoc(module.ref, module.position);
 					if (module.mmModule !== undefined) {
@@ -199,6 +206,7 @@ Module.register("MMM-Page-Selector", {
 				});
 				self.positionExclusions();
 			}, 500)
+			self.showTimouts.push(timeout)
 		}else{
 			Log.error("Tried to navigate to a non-existent page: ",pageName,", navigating to default");
 			if(pageName === self.config.defaultPage.toLowerCase()){
