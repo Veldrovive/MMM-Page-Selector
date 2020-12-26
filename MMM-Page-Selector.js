@@ -17,6 +17,7 @@ Module.register("MMM-Page-Selector", {
 		this.sendSocketNotification("UPDATE_PAGES");
 
 		this.page = this.config.defaultPage || this.config.page;
+		this.pageSwitchTimeout = this.config.pageSwitchTimeout || 0;
 		this.displayTitle = this.config.displayTitle;
 
 		this.selectPageNotif = ["PAGE_SELECT", "PAGE_CHANGED"].concat(this.config.selectPageNotif);
@@ -24,6 +25,7 @@ Module.register("MMM-Page-Selector", {
 		this.decrementPageNotif = ["DECREMENT_PAGE"].concat(this.config.decrementPageNotif);
 
 		this.showTimouts = []
+		this.lastSwitchTime = 0
 
 		if(this.config.hasOwnProperty("autoChange")){
 			autoChange = this.config.autoChange;
@@ -174,9 +176,10 @@ Module.register("MMM-Page-Selector", {
 			self.updateDom(0);
 
 			//Integration with MMM-page-indicator
-			const indexOfPage = Object.keys(self.pages).indexOf(pageName);
-			self.sendNotification("PAGE_CHANGED", indexOfPage);
-			self.sendNotification("PAGE_UPDATE", {index: indexOfPage, name: pageName});
+			self.indexOfPage = Object.keys(self.pages).indexOf(pageName);
+			self.pageName = pageName
+			self.sendNotification("PAGE_CHANGED", self.indexOfPage);
+			self.sendNotification("PAGE_UPDATE", {index: self.indexOfPage, name: self.pageName});
 			self.sendSocketNotification("WRITE_TEMP", {page: pageName})
 
 			//Code for moving and changing visibility for certain modules
@@ -235,6 +238,17 @@ Module.register("MMM-Page-Selector", {
 		function mod(n, m) {
 		  return ((n % m) + m) % m;
 		}
+
+		if (Date.now() - self.lastSwitchTime < self.pageSwitchTimeout) {
+			self.debug("Pages switched too fast. Time between switching must be greater than", self.pageSwitchTimeout)
+			// We re-emit page change notifications to update the ui of modules that expected a page change
+			setTimeout(() => {
+				self.sendNotification("PAGE_CHANGED", self.indexOfPage);
+				self.sendNotification("PAGE_UPDATE", {index: self.indexOfPage, name: self.pageName});
+			}, 0)  // We re-emit with a zero delay so that this is put on the event stack and is not immediatly sent.
+			return
+		}
+		self.lastSwitchTime = Date.now()
 
 		if(typeof page === "number"){
 			const pageArray = Object.keys(self.pages);
