@@ -17,7 +17,7 @@ Module.register("MMM-Page-Selector", {
 		this.sendSocketNotification("UPDATE_PAGES");
 
 		this.page = this.config.defaultPage || this.config.page;
-		this.pageSwitchTimeout = this.config.pageSwitchTimeout || 0;
+		this.pageSwitchTimeout = this.config.pageSwitchTimeout || 50;
 		this.displayTitle = this.config.displayTitle;
 
 		this.selectPageNotif = ["PAGE_SELECT", "PAGE_CHANGED"].concat(this.config.selectPageNotif);
