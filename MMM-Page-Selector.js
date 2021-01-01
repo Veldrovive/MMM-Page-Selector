@@ -362,13 +362,16 @@ Module.register("MMM-Page-Selector", {
 		const self = this;
 
 		if(notification === "SET_PAGE_CONFIG"){
+			self.debug("Node Helper set pages to:", payload)
 			self.pages = payload;
 			if (!(self.page in self.pages)) {
-				self.pages[self.page] = []
+				self.debug("Pages set does not include current page. Changing to", Object.keys(self.pages)[0])
+				self.page = Object.keys(self.pages)[0]
 			}
 			self.pagesLoaded = true;
 			self.addPageReferences();
 			self.init();
+			self.debug("Page object set to:", self.pages)
 		}else if (notification === "SET_EXCLUSIONS_CONFIG"){
 			self.neverHide = payload;
 			self.neverHide.push({"identifier": self.identifier, "position": self.data.position });
