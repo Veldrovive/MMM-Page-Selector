@@ -279,18 +279,24 @@ Module.register("MMM-Page-Selector", {
 			self.changePage(isNaN(payloadToNum) ? page : payloadToNum)
 		}
 
-		if(self.selectPageNotif.includes(notification)){
-			selectPage(payload);
+		const startRestoreDefault = () => {
 			clearTimeout(self.default_timeout);
 			if(![Object.keys(self.pages).indexOf(self.config.defaultPage), self.config.defaultPage].includes(payload) && self.config.restoreDefault > 0){
 			    self.default_timeout = setTimeout(() => {
 			        selectPage(self.config.defaultPage);
 			    }, self.config.restoreDefault*1000)
 			}
+		}
+
+		if(self.selectPageNotif.includes(notification)){
+			selectPage(payload)
+			startRestoreDefault()
 		}else if(self.incrementPageNotif.includes(notification)){
 			self.changePage(1, true)
+			startRestoreDefault()
 		}else if(self.decrementPageNotif.includes(notification)){
 			self.changePage(-1, true)
+			startRestoreDefault()
 		}else if(notification === "MODULE_DOM_CREATED"){
 			MM.getModules().enumerate(module => {
 				module.hide(0, { lockString: self.identifier });
