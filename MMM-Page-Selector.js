@@ -127,7 +127,7 @@ Module.register("MMM-Page-Selector", {
 			return false;
 		}
 		var containers = Array.from(moveToRef.childNodes);
-		var container = containers.filter(node => node.className == "container")[0]
+		var container = containers.filter(node => node.className != null && node.className.includes("container"))[0]
 		if(loc === self.data.position){
 			insertAfter(ref, self.getModuleRef(self))
 		}else{
@@ -388,7 +388,7 @@ Module.register("MMM-Page-Selector", {
 		}else if(notification === 'PAGE_SELECT'){
 			self.changePage(payload);
 		}else if(notification === "RESTART_DOM"){
-			window.location.reload(false); 
+			window.location.reload(false);
 		}
 	},
 
