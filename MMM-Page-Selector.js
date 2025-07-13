@@ -74,6 +74,10 @@ Module.register("MMM-Page-Selector", {
 				wrapper.innerHTML = "No Page Selected"
 			}
 		}
+		else
+		{
+			wrapper.innerHTML = "";
+		}
 
 		return wrapper;
 	},

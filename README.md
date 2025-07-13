@@ -1,6 +1,17 @@
 # MMM-Page-Selector
+> [!WARNING]
+> ### ⚠️ Project Status: Maintenance Mode
+>
+> This module is currently in maintenance mode. This means:
+>
+> *   I will only respond to issues reporting **major, system-breaking bugs**.
+> *   I will monitor and review **pull requests** for minor bug fixes and new features as my time allows.
+> *   I will **not** be actively responding to new issues requesting features or reporting minor bugs. Please consider submitting a pull request instead.
+>
+> Thank you for your understanding and contributions!
+
 ![Demo](https://i.imgur.com/7E7dn4n.gif)<br/>
-Page Selector is meant to make it easy to configure the positions and visibility of any module on your [MagicMirror²](https://github.com/MichMich/MagicMirror) on the fly and to make those pages able to be changed from any other module. By default, MMM-Page-Selector works with MMM-page-indicator and MMM-Voice-Commands, but could easily be configured to interact with other modules if the need arose. 
+Page Selector is meant to make it easy to configure the positions and visibility of any module on your [MagicMirror²](https://github.com/MichMich/MagicMirror) on the fly and to make those pages able to be changed from any other module. By default, MMM-Page-Selector works with MMM-page-indicator and MMM-Voice-Commands, but could easily be configured to interact with other modules if the need arose.
 
 ## Installation
 Navigate to the modules folder of your Magic Mirror installation.
@@ -169,15 +180,15 @@ exclusions: {
 ```
 Both `pages` and `exclusions` are on the same level as `modules`
 
-`pages`: 
+`pages`:
 
-* This contains objects where the key is the page name and the members are define the module names and positions. 
+* This contains objects where the key is the page name and the members are define the module names and positions.
   * The new `name` prop comes into play here. Both `module` and `name` are simply used as selectors. If you want to assign all `clock` modules to a certain position, then `"clock": "bottom_center"` will function, but if you want to have some clocks in some positions and some in others, then you assign them a `name` which can then be used as a selector. In this case, the groups used are:
     * `MMM-DWD-WarnWeather`: This one selects all the `MMM-DWD-WarnWeather` modules. An important note is that when a module name is used as the selector, it is overriden by usage of a `name` prop as the selector.
     * `middle_clock` and `bottom_clock`: Both of these only contain one member, a clock. They still function normally, but now the user can choose the positions of each clock individually instead of having to move them as a group as would happen if `clock` was used as the selector.
     * `transport_right` and `transport_left`: Both of these have multiple members and are used as ways of grouping modules so that they can be moved as a section instead of having to specify them individually. This is used if a set of modules should always be together.
-    
-`exclusions`: 
+
+`exclusions`:
 
 * This works the same as `pages: "all"` from the first method. The module is shown on all pages and the position is defined in the same way as it is in the pages config. The selector can be the `module name` or the `name` prop.
 
@@ -207,7 +218,7 @@ In order for an external module to interact with Page Selector, the other module
 To select the page at index `1` in the array:
 ```js
 this.sendNotification("PAGE_SELECT", "2");
-``` 
+```
 Yea, yea, yea... it should start at 0. Well that doesn't play nice with MMM-Voice-Commands so it starts at 1, deal with it.<br/><br/>
 To select the page named `weather`:
 ```js

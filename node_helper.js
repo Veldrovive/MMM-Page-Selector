@@ -56,7 +56,7 @@ module.exports = NodeHelper.create({
 			    }
 
 			    resolve();
-			}); 
+			});
 		})
 	},
 
@@ -85,11 +85,9 @@ module.exports = NodeHelper.create({
 
 	moveOldConfig: function(){
 		const self = this;
-		return new Promise(resolve => {
-			fs.rename(self.configPath, self.tempConfigPath, () =>{
-				resolve();
-			})
-		})
+		// We use fs.promises for a cleaner await syntax
+		const fsPromises = fs.promises;
+		return fsPromises.copyFile(self.configPath, self.tempConfigPath);
 	},
 
 	myStringify: function(json){
@@ -97,10 +95,10 @@ module.exports = NodeHelper.create({
 		const jsonReplacer = function (key, val) {
 		    if (typeof val === 'function') {
 		  	    functions.push(val.toString());
-		        
+
 		        return "{func_" + (functions.length - 1) + "}";
 		    }
-		        
+
 		    return val;
 		};
 		const funcReplacer = function (match, id) {
@@ -123,11 +121,12 @@ module.exports = NodeHelper.create({
 			    }
 
 			    resolve();
-			}); 
+			});
 		})
 	},
 
 	restoreOldConfig: function(){
+		console.log("Page Selector: Restoring old config");
 		const self = this;
 		return new Promise(resolve => {
 			fs.rename(self.tempConfigPath, self.configPath, () => {
@@ -147,7 +146,7 @@ module.exports = NodeHelper.create({
 		//This tells Page-Selector whether there are modules that dont have positions and so need to be re-rendered
 		let reRender = false;
 		// There are two options when defining pages and locations.
-		// If the pages are explicitly defined then that definition is used. 
+		// If the pages are explicitly defined then that definition is used.
 		// If they are not, then the config for each module is searched to find the pages key
 		if(config.hasOwnProperty("pages")){
 			const pages = config.pages;
@@ -270,6 +269,7 @@ module.exports = NodeHelper.create({
 			});
 		}
 		if(reRender){
+			console.log("Page Selector: Re-rendering modules due to undefined positions");
 			await self.moveOldConfig();
 			await self.writeNewConfig(config);
 			self.sendSocketNotification("RESTART_DOM");
