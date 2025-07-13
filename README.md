@@ -1,6 +1,5 @@
 # MMM-Page-Selector
 > [!WARNING]
-> ### ⚠️ Project Status: Maintenance Mode
 >
 > This module is currently in maintenance mode. This means:
 >
